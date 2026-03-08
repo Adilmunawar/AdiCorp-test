@@ -1,7 +1,7 @@
 
 import Dashboard from "@/components/layout/Dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Building, Calendar, Clock, DollarSign, Lock, Database } from "lucide-react";
+import { Settings, Building, Calendar, Clock, DollarSign, Lock, Database, ShieldCheck } from "lucide-react";
 import CompanySetupModal from "@/components/company/CompanySetupModal";
 import CurrencySettings from "@/components/settings/CurrencySettings";
 import WorkingDaysConfig from "@/components/settings/WorkingDaysConfig";
@@ -9,6 +9,7 @@ import MonthlyWorkingDaysManager from "@/components/settings/MonthlyWorkingDaysM
 import WorkingTimePolicies from "@/components/settings/WorkingTimePolicies";
 import PasswordSettings from "@/components/settings/PasswordSettings";
 import BackupManager from "@/components/backup/BackupManager";
+import SecuritySettings from "@/components/settings/SecuritySettings";
 
 export default function SettingsPage() {
   return (
@@ -25,13 +26,14 @@ export default function SettingsPage() {
 
         <Tabs defaultValue="company" className="space-y-6">
           <div className="glass-card p-2">
-            <TabsList className="bg-muted/50 grid grid-cols-7 p-1.5 gap-1 h-auto">
+            <TabsList className="bg-muted/50 grid grid-cols-4 md:grid-cols-8 p-1.5 gap-1 h-auto">
               {[
                 { value: "company", icon: Building, label: "Company" },
                 { value: "currency", icon: DollarSign, label: "Currency" },
                 { value: "working-days", icon: Calendar, label: "Working Days" },
                 { value: "monthly-config", icon: Settings, label: "Monthly" },
                 { value: "policies", icon: Clock, label: "Policies" },
+                { value: "security", icon: ShieldCheck, label: "Security" },
                 { value: "password", icon: Lock, label: "Password" },
                 { value: "backup", icon: Database, label: "Backup" },
               ].map((tab) => {
@@ -56,6 +58,7 @@ export default function SettingsPage() {
             { value: "working-days", icon: Calendar, title: "Working Days Configuration", desc: "Set up your company's working days and weekend schedule", color: "text-blue-600", bg: "bg-blue-500/10", content: <WorkingDaysConfig /> },
             { value: "monthly-config", icon: Settings, title: "Monthly Working Days", desc: "Configure working days and salary divisors for specific months", color: "text-violet-600", bg: "bg-violet-500/10", content: <MonthlyWorkingDaysManager /> },
             { value: "policies", icon: Clock, title: "Working Time Policies", desc: "Define working hours, overtime rules, and time-off policies", color: "text-orange-600", bg: "bg-orange-500/10", content: <WorkingTimePolicies /> },
+            { value: "security", icon: ShieldCheck, title: "Security & Biometrics", desc: "Configure 2FA, biometric lock, Face ID, and fingerprint authentication", color: "text-emerald-600", bg: "bg-emerald-500/10", content: <SecuritySettings /> },
             { value: "password", icon: Lock, title: "Password & Security", desc: "Update your password and manage security settings", color: "text-red-600", bg: "bg-red-500/10", content: <PasswordSettings /> },
             { value: "backup", icon: Database, title: "Backup & Restore", desc: "Create backups and restore your data safely", color: "text-teal-600", bg: "bg-teal-500/10", content: <BackupManager /> },
           ].map((tab) => {

@@ -19,6 +19,7 @@ import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import TimelineLogsPage from "./pages/TimelineLogs";
 import NotFound from "./pages/NotFound";
+import BiometricLockScreen from "./components/auth/BiometricLockScreen";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <BiometricLockScreen />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
