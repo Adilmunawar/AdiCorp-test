@@ -35,7 +35,7 @@ export default function Dashboard({ children, title }: DashboardProps) {
       <Sidebar />
       <div className={cn(
         "flex-1 min-h-screen flex flex-col transition-all duration-300",
-        sidebarCollapsed ? "ml-[68px]" : "ml-64"
+        sidebarCollapsed ? "ml-[60px]" : "ml-[252px]"
       )}>
         <Header title={title} />
         <main
