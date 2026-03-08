@@ -28,7 +28,7 @@ export const PrivateRoute = ({ children }: PrivateRouteProps) => {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-adicorp-purple mx-auto" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
           <p className="mt-4 text-white/60">Loading...</p>
         </div>
       </div>
