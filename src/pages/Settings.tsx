@@ -58,6 +58,7 @@ export default function SettingsPage() {
             { value: "working-days", icon: Calendar, title: "Working Days Configuration", desc: "Set up your company's working days and weekend schedule", color: "text-blue-600", bg: "bg-blue-500/10", content: <WorkingDaysConfig /> },
             { value: "monthly-config", icon: Settings, title: "Monthly Working Days", desc: "Configure working days and salary divisors for specific months", color: "text-violet-600", bg: "bg-violet-500/10", content: <MonthlyWorkingDaysManager /> },
             { value: "policies", icon: Clock, title: "Working Time Policies", desc: "Define working hours, overtime rules, and time-off policies", color: "text-orange-600", bg: "bg-orange-500/10", content: <WorkingTimePolicies /> },
+            { value: "security", icon: ShieldCheck, title: "Security & Biometrics", desc: "Configure 2FA, biometric lock, Face ID, and fingerprint authentication", color: "text-emerald-600", bg: "bg-emerald-500/10", content: <SecuritySettings /> },
             { value: "password", icon: Lock, title: "Password & Security", desc: "Update your password and manage security settings", color: "text-red-600", bg: "bg-red-500/10", content: <PasswordSettings /> },
             { value: "backup", icon: Database, title: "Backup & Restore", desc: "Create backups and restore your data safely", color: "text-teal-600", bg: "bg-teal-500/10", content: <BackupManager /> },
           ].map((tab) => {
