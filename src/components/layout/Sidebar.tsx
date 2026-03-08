@@ -34,7 +34,14 @@ export default function Sidebar() {
   const location = useLocation();
   const { signOut, user, loading } = useAuth();
   const { isLockEnabled, isRegistered, lockApp } = useBiometric();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true');
+
+  const toggleCollapsed = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem('sidebar_collapsed', String(next));
+    window.dispatchEvent(new Event('sidebar-toggle'));
+  };
   
   const groups = Object.keys(groupLabels);
 
