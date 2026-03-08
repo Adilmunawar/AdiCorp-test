@@ -112,7 +112,7 @@ export default function Sidebar() {
 
       {/* Collapse toggle */}
       <button 
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={toggleCollapsed}
         className="absolute -right-3 top-[68px] z-50 w-6 h-6 rounded-full bg-card border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 hover:scale-110"
       >
         {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
