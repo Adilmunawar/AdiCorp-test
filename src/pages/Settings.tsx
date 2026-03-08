@@ -16,188 +16,67 @@ export default function SettingsPage() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <div className="glass-card p-6 mb-6">
-            <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-adicorp-purple to-white bg-clip-text text-transparent">
-              System Settings
-            </h1>
-            <p className="text-white/70 text-lg">
-              Configure your company settings, preferences, and system parameters to customize your HR management experience
+            <h1 className="text-3xl font-bold mb-2 text-foreground">System Settings</h1>
+            <p className="text-muted-foreground text-lg">
+              Configure your company settings, preferences, and system parameters
             </p>
           </div>
         </div>
 
         <Tabs defaultValue="company" className="space-y-6">
           <div className="glass-card p-2">
-            <TabsList className="bg-adicorp-dark-light/60 grid grid-cols-7 p-2 gap-1 h-auto">
-              <TabsTrigger 
-                value="company" 
-                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-adicorp-purple data-[state=active]:text-white text-white/70 hover:text-white transition-all duration-200"
-              >
-                <Building className="h-5 w-5" />
-                <span className="text-xs font-medium">Company</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="currency" 
-                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-adicorp-purple data-[state=active]:text-white text-white/70 hover:text-white transition-all duration-200"
-              >
-                <DollarSign className="h-5 w-5" />
-                <span className="text-xs font-medium">Currency</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="working-days" 
-                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-adicorp-purple data-[state=active]:text-white text-white/70 hover:text-white transition-all duration-200"
-              >
-                <Calendar className="h-5 w-5" />
-                <span className="text-xs font-medium">Working Days</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="monthly-config" 
-                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-adicorp-purple data-[state=active]:text-white text-white/70 hover:text-white transition-all duration-200"
-              >
-                <Settings className="h-5 w-5" />
-                <span className="text-xs font-medium">Monthly</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="policies" 
-                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-adicorp-purple data-[state=active]:text-white text-white/70 hover:text-white transition-all duration-200"
-              >
-                <Clock className="h-5 w-5" />
-                <span className="text-xs font-medium">Policies</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="password" 
-                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-adicorp-purple data-[state=active]:text-white text-white/70 hover:text-white transition-all duration-200"
-              >
-                <Lock className="h-5 w-5" />
-                <span className="text-xs font-medium">Password</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="backup" 
-                className="flex flex-col items-center gap-2 p-4 data-[state=active]:bg-adicorp-purple data-[state=active]:text-white text-white/70 hover:text-white transition-all duration-200"
-              >
-                <Database className="h-5 w-5" />
-                <span className="text-xs font-medium">Backup</span>
-              </TabsTrigger>
+            <TabsList className="bg-muted/50 grid grid-cols-7 p-1.5 gap-1 h-auto">
+              {[
+                { value: "company", icon: Building, label: "Company" },
+                { value: "currency", icon: DollarSign, label: "Currency" },
+                { value: "working-days", icon: Calendar, label: "Working Days" },
+                { value: "monthly-config", icon: Settings, label: "Monthly" },
+                { value: "policies", icon: Clock, label: "Policies" },
+                { value: "password", icon: Lock, label: "Password" },
+                { value: "backup", icon: Database, label: "Backup" },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="flex flex-col items-center gap-2 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground hover:text-foreground transition-all duration-200 rounded-lg"
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="text-xs font-medium">{tab.label}</span>
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
           </div>
 
-          <TabsContent value="company" className="space-y-6">
-            <div className="glass-card p-1">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-adicorp-purple/20">
-                    <Building className="h-6 w-6 text-adicorp-purple" />
+          {[
+            { value: "company", icon: Building, title: "Company Information", desc: "Manage your company details and branding", color: "text-primary", bg: "bg-primary/10", content: <CompanySetupModal /> },
+            { value: "currency", icon: DollarSign, title: "Currency Settings", desc: "Configure your preferred currency for salary calculations", color: "text-green-600", bg: "bg-green-500/10", content: <CurrencySettings /> },
+            { value: "working-days", icon: Calendar, title: "Working Days Configuration", desc: "Set up your company's working days and weekend schedule", color: "text-blue-600", bg: "bg-blue-500/10", content: <WorkingDaysConfig /> },
+            { value: "monthly-config", icon: Settings, title: "Monthly Working Days", desc: "Configure working days and salary divisors for specific months", color: "text-violet-600", bg: "bg-violet-500/10", content: <MonthlyWorkingDaysManager /> },
+            { value: "policies", icon: Clock, title: "Working Time Policies", desc: "Define working hours, overtime rules, and time-off policies", color: "text-orange-600", bg: "bg-orange-500/10", content: <WorkingTimePolicies /> },
+            { value: "password", icon: Lock, title: "Password & Security", desc: "Update your password and manage security settings", color: "text-red-600", bg: "bg-red-500/10", content: <PasswordSettings /> },
+            { value: "backup", icon: Database, title: "Backup & Restore", desc: "Create backups and restore your data safely", color: "text-teal-600", bg: "bg-teal-500/10", content: <BackupManager /> },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <TabsContent key={tab.value} value={tab.value} className="space-y-6">
+                <div className="glass-card p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className={`p-2 rounded-lg ${tab.bg}`}>
+                      <Icon className={`h-6 w-6 ${tab.color}`} />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-semibold text-foreground">{tab.title}</h2>
+                      <p className="text-muted-foreground">{tab.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white">Company Information</h2>
-                    <p className="text-white/70">Manage your company details and branding</p>
-                  </div>
+                  {tab.content}
                 </div>
-                <CompanySetupModal />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="currency" className="space-y-6">
-            <div className="glass-card p-1">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-green-500/20">
-                    <DollarSign className="h-6 w-6 text-green-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white">Currency Settings</h2>
-                    <p className="text-white/70">Configure your preferred currency for salary calculations</p>
-                  </div>
-                </div>
-                <CurrencySettings />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="working-days" className="space-y-6">
-            <div className="glass-card p-1">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-blue-500/20">
-                    <Calendar className="h-6 w-6 text-blue-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white">Working Days Configuration</h2>
-                    <p className="text-white/70">Set up your company's working days and weekend schedule</p>
-                  </div>
-                </div>
-                <WorkingDaysConfig />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="monthly-config" className="space-y-6">
-            <div className="glass-card p-1">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-purple-500/20">
-                    <Settings className="h-6 w-6 text-purple-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white">Monthly Working Days</h2>
-                    <p className="text-white/70">Configure working days and salary divisors for specific months</p>
-                  </div>
-                </div>
-                <MonthlyWorkingDaysManager />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="policies" className="space-y-6">
-            <div className="glass-card p-1">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-orange-500/20">
-                    <Clock className="h-6 w-6 text-orange-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white">Working Time Policies</h2>
-                    <p className="text-white/70">Define working hours, overtime rules, and time-off policies</p>
-                  </div>
-                </div>
-                <WorkingTimePolicies />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="password" className="space-y-6">
-            <div className="glass-card p-1">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-red-500/20">
-                    <Lock className="h-6 w-6 text-red-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white">Password & Security</h2>
-                    <p className="text-white/70">Update your password and manage security settings</p>
-                  </div>
-                </div>
-                <PasswordSettings />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="backup" className="space-y-6">
-            <div className="glass-card p-1">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-teal-500/20">
-                    <Database className="h-6 w-6 text-teal-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white">Backup & Restore</h2>
-                    <p className="text-white/70">Create backups and restore your data safely</p>
-                  </div>
-                </div>
-                <BackupManager />
-              </div>
-            </div>
-          </TabsContent>
+              </TabsContent>
+            );
+          })}
         </Tabs>
       </div>
     </Dashboard>
