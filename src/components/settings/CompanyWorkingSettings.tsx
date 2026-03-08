@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,94 +32,45 @@ export default function CompanyWorkingSettings() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (userProfile?.company_id) {
-      fetchSettings();
-    }
+    if (userProfile?.company_id) { fetchSettings(); }
   }, [userProfile?.company_id]);
 
   const fetchSettings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('company_working_settings')
-        .select('*')
-        .eq('company_id', userProfile?.company_id)
-        .maybeSingle();
-
+      const { data, error } = await supabase.from('company_working_settings').select('*').eq('company_id', userProfile?.company_id).maybeSingle();
       if (error && error.code !== 'PGRST116') throw error;
-
-      if (data) {
-        setSettings(data);
-      } else {
-        setSettings(prev => ({ ...prev, company_id: userProfile?.company_id || '' }));
-      }
-    } catch (error) {
-      console.error("Error fetching company working settings:", error);
-    }
+      if (data) { setSettings(data); } else { setSettings(prev => ({ ...prev, company_id: userProfile?.company_id || '' })); }
+    } catch (error) { console.error("Error fetching company working settings:", error); }
   };
 
   const handleWorkingDaysChange = (value: string) => {
     const workingDays = parseInt(value);
     const saturdayWorking = workingDays === 6;
-    setSettings(prev => ({
-      ...prev,
-      default_working_days_per_week: workingDays,
-      default_working_days_per_month: saturdayWorking ? 26 : 22,
-      salary_divisor: saturdayWorking ? 26 : 22, // Dynamic divisor based on Saturday
-      weekend_saturday: saturdayWorking,
-    }));
+    setSettings(prev => ({ ...prev, default_working_days_per_week: workingDays, default_working_days_per_month: saturdayWorking ? 26 : 22, salary_divisor: saturdayWorking ? 26 : 22, weekend_saturday: saturdayWorking }));
   };
 
   const handleSaturdayChange = (checked: boolean) => {
-    setSettings(prev => ({
-      ...prev,
-      weekend_saturday: checked,
-      default_working_days_per_week: checked ? 6 : 5,
-      default_working_days_per_month: checked ? 26 : 22,
-      salary_divisor: checked ? 26 : 22, // Dynamic divisor
-    }));
+    setSettings(prev => ({ ...prev, weekend_saturday: checked, default_working_days_per_week: checked ? 6 : 5, default_working_days_per_month: checked ? 26 : 22, salary_divisor: checked ? 26 : 22 }));
   };
 
   const handleSave = async () => {
     try {
       setLoading(true);
       if (!userProfile?.company_id) return;
-
-      const { error } = await supabase
-        .from('company_working_settings')
-        .upsert({
-          company_id: userProfile.company_id,
-          default_working_days_per_week: settings.default_working_days_per_week,
-          default_working_days_per_month: settings.default_working_days_per_month,
-          salary_divisor: settings.salary_divisor,
-          weekend_saturday: settings.weekend_saturday,
-          weekend_sunday: settings.weekend_sunday,
-        }, {
-          onConflict: 'company_id'
-        });
-
+      const { error } = await supabase.from('company_working_settings').upsert({ company_id: userProfile.company_id, default_working_days_per_week: settings.default_working_days_per_week, default_working_days_per_month: settings.default_working_days_per_month, salary_divisor: settings.salary_divisor, weekend_saturday: settings.weekend_saturday, weekend_sunday: settings.weekend_sunday }, { onConflict: 'company_id' });
       if (error) throw error;
-
-      toast({
-        title: "Settings Saved",
-        description: "Company working settings have been updated. Salary divisor is now " + (settings.weekend_saturday ? "26" : "22") + ".",
-      });
+      toast({ title: "Settings Saved", description: "Company working settings have been updated. Salary divisor is now " + (settings.weekend_saturday ? "26" : "22") + "." });
     } catch (error) {
       console.error("Error saving settings:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save company working settings.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+      toast({ title: "Error", description: "Failed to save company working settings.", variant: "destructive" });
+    } finally { setLoading(false); }
   };
 
   return (
     <Card className="glass-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Settings className="h-5 w-5 text-adicorp-purple" />
+          <Settings className="h-5 w-5 text-primary" />
           Company Working Days Configuration
         </CardTitle>
       </CardHeader>
@@ -129,11 +79,8 @@ export default function CompanyWorkingSettings() {
           <div className="space-y-4">
             <div>
               <Label className="text-sm font-medium mb-2 block">Working Days Per Week</Label>
-              <Select 
-                value={settings.default_working_days_per_week.toString()}
-                onValueChange={handleWorkingDaysChange}
-              >
-                <SelectTrigger className="bg-adicorp-dark border-white/10">
+              <Select value={settings.default_working_days_per_week.toString()} onValueChange={handleWorkingDaysChange}>
+                <SelectTrigger className="bg-background border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -142,63 +89,43 @@ export default function CompanyWorkingSettings() {
                 </SelectContent>
               </Select>
             </div>
-
             <div className="flex items-center justify-between">
               <Label htmlFor="saturday" className="text-sm">Saturday as Working Day</Label>
-              <Switch
-                id="saturday"
-                checked={settings.weekend_saturday}
-                onCheckedChange={handleSaturdayChange}
-              />
+              <Switch id="saturday" checked={settings.weekend_saturday} onCheckedChange={handleSaturdayChange} />
             </div>
-
             <div className="flex items-center justify-between">
               <Label htmlFor="sunday" className="text-sm">Sunday as Off Day</Label>
-              <Switch
-                id="sunday"
-                checked={settings.weekend_sunday}
-                onCheckedChange={(checked) => 
-                  setSettings(prev => ({ ...prev, weekend_sunday: checked }))
-                }
-              />
+              <Switch id="sunday" checked={settings.weekend_sunday} onCheckedChange={(checked) => setSettings(prev => ({ ...prev, weekend_sunday: checked }))} />
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="p-4 bg-adicorp-dark/30 rounded-lg border border-white/10">
+            <div className="p-4 bg-muted/50 rounded-lg border border-border">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-4 w-4 text-adicorp-purple" />
+                <Calendar className="h-4 w-4 text-primary" />
                 <span className="font-medium">Monthly Summary</span>
               </div>
-              <p className="text-sm text-white/70 mb-2">
-                Working Days per Month: <span className="text-white font-medium">{settings.default_working_days_per_month}</span>
+              <p className="text-sm text-muted-foreground mb-2">
+                Working Days per Month: <span className="text-foreground font-medium">{settings.default_working_days_per_month}</span>
               </p>
-              <p className="text-sm text-white/70">
-                Salary Divisor: <span className="text-white font-medium">{settings.salary_divisor}</span>
+              <p className="text-sm text-muted-foreground">
+                Salary Divisor: <span className="text-foreground font-medium">{settings.salary_divisor}</span>
               </p>
             </div>
-
             <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
               <div className="flex items-center gap-2 mb-2">
-                <Clock className="h-4 w-4 text-green-400" />
-                <span className="font-medium text-green-400">New Logic</span>
+                <Clock className="h-4 w-4 text-green-600" />
+                <span className="font-medium text-green-600">New Logic</span>
               </div>
-              <p className="text-xs text-green-300">
-                {settings.weekend_saturday 
-                  ? "Saturday is working day → Salary ÷ 26 for daily rate"
-                  : "Saturday is off → Salary ÷ 22 for daily rate"
-                }
+              <p className="text-xs text-green-600">
+                {settings.weekend_saturday ? "Saturday is working day → Salary ÷ 26 for daily rate" : "Saturday is off → Salary ÷ 22 for daily rate"}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="pt-4 border-t border-white/10">
-          <Button 
-            onClick={handleSave}
-            disabled={loading}
-            className="bg-adicorp-purple hover:bg-adicorp-purple-dark"
-          >
+        <div className="pt-4 border-t border-border">
+          <Button onClick={handleSave} disabled={loading}>
             {loading ? 'Saving...' : 'Save Configuration'}
           </Button>
         </div>
