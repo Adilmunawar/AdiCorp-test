@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,33 +7,33 @@
 
 @layer base {
   :root {
-    --background: 222 47% 8%;
-    --foreground: 210 20% 98%;
+    --background: 0 0% 100%;
+    --foreground: 200 15% 15%;
     
-    --card: 223 45% 11%;
-    --card-foreground: 210 20% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 15% 15%;
     
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 15% 15%;
     
-    --primary: 217 91% 60%;
+    --primary: 168 65% 38%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 217 20% 30%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 168 20% 95%;
+    --secondary-foreground: 168 40% 30%;
     
-    --muted: 217 15% 20%;
-    --muted-foreground: 215 15% 65%;
+    --muted: 180 10% 96%;
+    --muted-foreground: 200 10% 45%;
     
-    --accent: 217 30% 25%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 168 25% 93%;
+    --accent-foreground: 168 40% 30%;
     
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
     
-    --border: 217 20% 18%;
-    --input: 217 20% 18%;
-    --ring: 217 91% 60%;
+    --border: 200 10% 90%;
+    --input: 200 10% 90%;
+    --ring: 168 65% 38%;
     
     --radius: 0.5rem;
   }
@@ -45,7 +45,7 @@
   }
   
   html, body, #root {
-    @apply h-full font-sans bg-adicorp-dark text-foreground;
+    @apply h-full font-sans bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
@@ -55,19 +55,13 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-poppins font-medium;
+    @apply font-display font-semibold;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply backdrop-blur-sm border border-border bg-card/80 rounded-lg;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    transition: box-shadow 0.2s ease;
-  }
-
-  .glass-card:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+    @apply border border-border bg-card rounded-lg shadow-sm;
   }
   
   .nav-item {
@@ -76,47 +70,37 @@
   }
   
   .nav-item.active {
-    @apply bg-primary/10 text-primary border-l-2 border-primary;
+    @apply bg-primary/10 text-primary;
   }
-  
-
-
-
-
-
-
 }
 
-/* Professional scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-background;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted rounded-full;
-  transition: background 0.2s ease;
+  @apply bg-border rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-muted-foreground/50;
+  @apply bg-muted-foreground/30;
 }
 
-/* Selection styling */
+/* Selection */
 ::selection {
-  @apply bg-primary/20 text-foreground;
+  @apply bg-primary/15 text-foreground;
 }
 
-/* Focus states */
+/* Focus */
 *:focus-visible {
   @apply outline-primary outline-2 outline-offset-2 rounded;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
-
