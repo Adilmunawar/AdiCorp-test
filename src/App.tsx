@@ -19,6 +19,8 @@ import Salary from "./pages/Salary";
 import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import TimelineLogsPage from "./pages/TimelineLogs";
+import LeaveManagement from "./pages/LeaveManagement";
+import OvertimePage from "./pages/Overtime";
 import NotFound from "./pages/NotFound";
 import BiometricLockScreen from "./components/auth/BiometricLockScreen";
 
