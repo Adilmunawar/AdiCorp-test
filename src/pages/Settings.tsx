@@ -1,7 +1,7 @@
 
 import Dashboard from "@/components/layout/Dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Building, Calendar, Clock, DollarSign, Lock, Database } from "lucide-react";
+import { Settings, Building, Calendar, Clock, DollarSign, Lock, Database, ShieldCheck } from "lucide-react";
 import CompanySetupModal from "@/components/company/CompanySetupModal";
 import CurrencySettings from "@/components/settings/CurrencySettings";
 import WorkingDaysConfig from "@/components/settings/WorkingDaysConfig";
@@ -9,6 +9,7 @@ import MonthlyWorkingDaysManager from "@/components/settings/MonthlyWorkingDaysM
 import WorkingTimePolicies from "@/components/settings/WorkingTimePolicies";
 import PasswordSettings from "@/components/settings/PasswordSettings";
 import BackupManager from "@/components/backup/BackupManager";
+import SecuritySettings from "@/components/settings/SecuritySettings";
 
 export default function SettingsPage() {
   return (
