@@ -26,13 +26,14 @@ export default function SettingsPage() {
 
         <Tabs defaultValue="company" className="space-y-6">
           <div className="glass-card p-2">
-            <TabsList className="bg-muted/50 grid grid-cols-7 p-1.5 gap-1 h-auto">
+            <TabsList className="bg-muted/50 grid grid-cols-4 md:grid-cols-8 p-1.5 gap-1 h-auto">
               {[
                 { value: "company", icon: Building, label: "Company" },
                 { value: "currency", icon: DollarSign, label: "Currency" },
                 { value: "working-days", icon: Calendar, label: "Working Days" },
                 { value: "monthly-config", icon: Settings, label: "Monthly" },
                 { value: "policies", icon: Clock, label: "Policies" },
+                { value: "security", icon: ShieldCheck, label: "Security" },
                 { value: "password", icon: Lock, label: "Password" },
                 { value: "backup", icon: Database, label: "Backup" },
               ].map((tab) => {
