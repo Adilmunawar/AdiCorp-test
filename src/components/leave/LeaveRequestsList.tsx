@@ -28,7 +28,7 @@ export default function LeaveRequestsList() {
         .order("created_at", { ascending: false });
 
       if (statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
+        query = query.eq("status", statusFilter as "pending" | "approved" | "rejected" | "cancelled");
       }
 
       const { data, error } = await query;
