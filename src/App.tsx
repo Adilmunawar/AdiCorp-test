@@ -19,6 +19,8 @@ import Salary from "./pages/Salary";
 import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import TimelineLogsPage from "./pages/TimelineLogs";
+import LeaveManagement from "./pages/LeaveManagement";
+import OvertimePage from "./pages/Overtime";
 import NotFound from "./pages/NotFound";
 import BiometricLockScreen from "./components/auth/BiometricLockScreen";
 
@@ -43,6 +45,8 @@ function AnimatedRoutes() {
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
           <Route path="/timeline-logs" element={<PrivateRoute><TimelineLogsPage /></PrivateRoute>} />
+          <Route path="/leave-management" element={<PrivateRoute><LeaveManagement /></PrivateRoute>} />
+          <Route path="/overtime" element={<PrivateRoute><OvertimePage /></PrivateRoute>} />
           <Route path="/404" element={<NotFound />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
