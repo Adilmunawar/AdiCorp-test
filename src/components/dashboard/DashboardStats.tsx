@@ -73,7 +73,7 @@ export default function DashboardStats() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (
-          <Card key={i}>
+          <Card key={i} className="border border-border">
             <CardContent className="p-5">
               <Skeleton className="h-3 w-24 mb-3" />
               <Skeleton className="h-7 w-16 mb-2" />
@@ -88,12 +88,12 @@ export default function DashboardStats() {
   if (!stats) return null;
 
   const statCards = [
-    { title: "Total Employees", value: stats.totalEmployees, description: `${stats.activeEmployees} active`, icon: Users },
-    { title: "Today's Attendance", value: stats.todayAttendance, description: `${stats.attendanceRate}% rate`, icon: UserCheck },
-    { title: "Monthly Attendance", value: stats.monthlyAttendance, description: "This month", icon: Calendar },
-    { title: "Wage Budget", value: formatCurrency(stats.totalWageRate), description: "Combined rates", icon: DollarSign },
-    { title: "Current Date", value: format(new Date(), "MMM dd"), description: format(new Date(), "yyyy"), icon: Clock },
-    { title: "Attendance Rate", value: `${stats.attendanceRate}%`, description: "Today", icon: TrendingUp },
+    { title: "Total Employees", value: stats.totalEmployees, description: `${stats.activeEmployees} active`, icon: Users, accent: "from-teal-500/10 to-emerald-500/10" },
+    { title: "Today's Attendance", value: stats.todayAttendance, description: `${stats.attendanceRate}% rate`, icon: UserCheck, accent: "from-blue-500/10 to-cyan-500/10" },
+    { title: "Monthly Attendance", value: stats.monthlyAttendance, description: "This month", icon: Calendar, accent: "from-violet-500/10 to-purple-500/10" },
+    { title: "Wage Budget", value: formatCurrency(stats.totalWageRate), description: "Combined rates", icon: DollarSign, accent: "from-green-500/10 to-lime-500/10" },
+    { title: "Current Date", value: format(new Date(), "MMM dd"), description: format(new Date(), "yyyy"), icon: Clock, accent: "from-orange-500/10 to-amber-500/10" },
+    { title: "Attendance Rate", value: `${stats.attendanceRate}%`, description: "Today", icon: TrendingUp, accent: "from-pink-500/10 to-rose-500/10" },
   ];
 
   return (
@@ -101,9 +101,11 @@ export default function DashboardStats() {
       {statCards.map((stat, index) => {
         const Icon = stat.icon;
         return (
-          <Card key={index}>
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
+          <Card key={index} className="border border-border overflow-hidden group cursor-default transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 hover:-translate-y-0.5">
+            <CardContent className="p-5 relative">
+              {/* Hover gradient */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+              <div className="relative flex items-start justify-between">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                     {stat.title}
@@ -113,8 +115,8 @@ export default function DashboardStats() {
                   </h3>
                   <p className="text-xs text-muted-foreground">{stat.description}</p>
                 </div>
-                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Icon className="h-4 w-4 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110 group-hover:rotate-3">
+                  <Icon className="h-5 w-5 text-primary" />
                 </div>
               </div>
             </CardContent>
