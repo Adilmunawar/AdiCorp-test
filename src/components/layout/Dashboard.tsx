@@ -10,6 +10,7 @@ interface DashboardProps {
 
 export default function Dashboard({ children, title }: DashboardProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const handleStorage = () => {
@@ -17,12 +18,16 @@ export default function Dashboard({ children, title }: DashboardProps) {
     };
     handleStorage();
     window.addEventListener('storage', handleStorage);
-    // Also listen for custom event
     window.addEventListener('sidebar-toggle', handleStorage);
     return () => {
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('sidebar-toggle', handleStorage);
     };
+  }, []);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   return (
@@ -33,7 +38,13 @@ export default function Dashboard({ children, title }: DashboardProps) {
         sidebarCollapsed ? "ml-[68px]" : "ml-64"
       )}>
         <Header title={title} />
-        <main className="flex-1 p-6 overflow-auto">
+        <main
+          className="flex-1 p-6 overflow-auto transition-all duration-500 ease-out"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(8px)",
+          }}
+        >
           <div className="max-w-full">{children}</div>
         </main>
       </div>
