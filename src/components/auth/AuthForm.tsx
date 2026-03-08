@@ -78,9 +78,9 @@ export default function AuthForm() {
 
           <div className="flex items-center gap-6 pt-4">
             {[
-              { value: "500+", label: "Companies" },
-              { value: "10K+", label: "Employees" },
               { value: "99.9%", label: "Uptime" },
+              { value: "AES-256", label: "Encryption" },
+              { value: "SOC 2", label: "Compliant" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl font-bold text-primary-foreground">{stat.value}</div>
