@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   Calendar, Users, BarChart, Settings, Clock, ChartPie,
   UserCog, LogOut, Home, Shield, FileText, ChevronLeft, 
-  ChevronRight, Fingerprint, Lock
+  ChevronRight, Fingerprint, Lock, CalendarDays, Timer
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
