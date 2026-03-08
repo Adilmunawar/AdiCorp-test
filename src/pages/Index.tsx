@@ -916,6 +916,11 @@ export default function Index() {
           </div>
           <div className="border-t border-border/50 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <span className="text-sm text-muted-foreground">© 2025 AdiCorp. All rights reserved.</span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Proudly developed by</span>
+              <span className="font-semibold text-primary hover:text-primary/80 transition-colors cursor-default">Adil Munawar</span>
+              <Heart className="w-3.5 h-3.5 text-primary fill-primary animate-bounce-subtle" />
+            </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
               {["Privacy", "Terms", "Contact"].map(item => (
                 <span key={item} className="cursor-pointer hover:text-primary transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full" onClick={item === "Contact" ? () => window.open(`https://wa.me/${whatsappNumber}`, '_blank') : undefined}>{item}</span>
