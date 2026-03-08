@@ -9,6 +9,7 @@ import {
   Layers, Lock, HeadphonesIcon, MessageCircle, Sparkles,
   TrendingUp, MousePointerClick, Play, ArrowUpRight, Cpu,
   ChevronDown, Activity, Eye, Target, Rocket, Heart,
+  ExternalLink, ChevronUp,
 } from "lucide-react";
 
 /* ── Hooks ────────────────────────────────────────── */
@@ -75,28 +76,76 @@ function FloatingParticle({ style }: { style: React.CSSProperties }) {
   );
 }
 
-function MagneticButton({ children, className = "", onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
+/** Premium button with ripple effect */
+function PremiumButton({
+  children,
+  className = "",
+  onClick,
+  variant = "primary",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  variant?: "primary" | "glass" | "ghost" | "cta-invert";
+}) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number; size: number }[]>([]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!btnRef.current) return;
     const rect = btnRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left - rect.width / 2) * 0.15;
-    const y = (e.clientY - rect.top - rect.height / 2) * 0.15;
+    const x = (e.clientX - rect.left - rect.width / 2) * 0.12;
+    const y = (e.clientY - rect.top - rect.height / 2) * 0.12;
     setPos({ x, y });
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 2;
+    const newRipple = {
+      id: Date.now(),
+      x: e.clientX - rect.left - size / 2,
+      y: e.clientY - rect.top - size / 2,
+      size,
+    };
+    setRipples(prev => [...prev, newRipple]);
+    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== newRipple.id)), 700);
+    onClick?.();
+  };
+
+  const baseClasses = "relative overflow-hidden inline-flex items-center justify-center font-semibold tracking-tight transition-all duration-500 rounded-2xl cursor-pointer select-none active:scale-[0.97]";
+
+  const variantClasses = {
+    primary: "bg-primary text-primary-foreground btn-glow hover:shadow-primary/40 h-14 px-10 text-base gap-2.5",
+    glass: "btn-glass text-foreground h-14 px-10 text-base gap-2.5 hover:scale-[1.02]",
+    ghost: "text-muted-foreground hover:text-primary hover:bg-primary/5 h-10 px-5 text-sm gap-2 rounded-xl",
+    "cta-invert": "bg-card text-foreground h-14 px-10 text-base gap-2.5 shadow-2xl hover:shadow-primary/20 hover:scale-[1.03]",
   };
 
   return (
     <button
       ref={btnRef}
-      className={className}
-      style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, transition: 'transform 0.2s ease-out' }}
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+      style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, transition: 'transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease, scale 0.2s ease' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setPos({ x: 0, y: 0 })}
-      onClick={onClick}
+      onClick={handleClick}
     >
-      {children}
+      {/* Shimmer sweep */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent -translate-x-full hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+      
+      {/* Ripple effects */}
+      {ripples.map(r => (
+        <span
+          key={r.id}
+          className="ripple"
+          style={{ left: r.x, top: r.y, width: r.size, height: r.size }}
+        />
+      ))}
+
+      <span className="relative z-10 flex items-center gap-2">{children}</span>
     </button>
   );
 }
@@ -111,12 +160,12 @@ function TiltCard({ children, className = "" }: { children: React.ReactNode; cla
     const rect = cardRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
-    setTransform(`perspective(800px) rotateX(${(y - 0.5) * 10}deg) rotateY(${(x - 0.5) * -10}deg) scale3d(1.03, 1.03, 1.03)`);
-    setGlare({ x: x * 100, y: y * 100, opacity: 0.2 });
+    setTransform(`perspective(1000px) rotateX(${(y - 0.5) * 8}deg) rotateY(${(x - 0.5) * -8}deg) scale3d(1.02, 1.02, 1.02)`);
+    setGlare({ x: x * 100, y: y * 100, opacity: 0.15 });
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    setTransform("perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)");
+    setTransform("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)");
     setGlare({ x: 50, y: 50, opacity: 0 });
   }, []);
 
@@ -124,7 +173,7 @@ function TiltCard({ children, className = "" }: { children: React.ReactNode; cla
     <div
       ref={cardRef}
       className={`relative overflow-hidden ${className}`}
-      style={{ transform, transition: 'transform 0.2s cubic-bezier(0.03, 0.98, 0.52, 0.99)' }}
+      style={{ transform, transition: 'transform 0.4s cubic-bezier(0.03, 0.98, 0.52, 0.99)' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -210,6 +259,20 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
       </span>
       <span className="text-xl md:text-2xl font-bold text-primary ml-0.5">{suffix}</span>
     </span>
+  );
+}
+
+/** Animated underline for nav links */
+function NavLink({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="relative text-sm text-muted-foreground font-medium px-4 py-2 rounded-xl hover:text-foreground transition-all duration-300 group hidden sm:inline-flex"
+    >
+      <span className="relative z-10">{label}</span>
+      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-primary rounded-full transition-all duration-500 group-hover:w-2/3" />
+      <span className="absolute inset-0 rounded-xl bg-primary/0 group-hover:bg-primary/5 transition-all duration-300" />
+    </button>
   );
 }
 
@@ -310,38 +373,35 @@ export default function Index() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background overflow-x-hidden" onMouseMove={handleMouseMove}>
-      {/* Cursor glow — larger & smoother */}
+      {/* Cursor glow */}
       <div
-        className="fixed pointer-events-none z-[100] w-[700px] h-[700px] rounded-full opacity-[0.035] bg-primary blur-[150px]"
-        style={{ left: mousePos.x - 350, top: mousePos.y - 350, transition: 'left 0.6s ease-out, top 0.6s ease-out' }}
+        className="fixed pointer-events-none z-[100] w-[700px] h-[700px] rounded-full opacity-[0.03] bg-primary blur-[150px]"
+        style={{ left: mousePos.x - 350, top: mousePos.y - 350, transition: 'left 0.8s cubic-bezier(0.22, 1, 0.36, 1), top 0.8s cubic-bezier(0.22, 1, 0.36, 1)' }}
       />
 
       {/* ── HEADER ── */}
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b border-border/50 bg-background/60 backdrop-blur-2xl sticky top-0 z-50">
+      <header className={`px-4 lg:px-8 h-16 flex items-center bg-background/50 backdrop-blur-2xl sticky top-0 z-50 transition-all duration-500 ${scrollY > 50 ? 'border-b border-border/50 shadow-sm shadow-foreground/[0.02]' : 'border-b border-transparent'}`}>
         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate("/")}>
           <div className="relative">
-            <img src="/AdilMunawar-Uploads/31e3e556-6bb0-44a2-bd2d-6d5fa04f0ba9.png" alt="AdiCorp Logo" className="w-9 h-9 rounded-lg object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg group-hover:shadow-primary/30" />
+            <img src="/AdilMunawar-Uploads/31e3e556-6bb0-44a2-bd2d-6d5fa04f0ba9.png" alt="AdiCorp Logo" className="w-9 h-9 rounded-xl object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-lg group-hover:shadow-primary/30" />
             <div className="absolute -inset-1 rounded-xl bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md" />
           </div>
           <span className="text-lg font-bold text-foreground tracking-tight">AdiCorp</span>
         </div>
-        <nav className="ml-auto flex items-center gap-1.5">
-          {[
-            { label: "Features", id: "features" },
-            { label: "How It Works", id: "how-it-works" },
-          ].map(nav => (
-            <Button key={nav.id} variant="ghost" className="text-muted-foreground hidden sm:inline-flex hover:text-primary transition-all duration-300 relative overflow-hidden group/nav" onClick={() => document.getElementById(nav.id)?.scrollIntoView({ behavior: 'smooth' })}>
-              <span className="relative z-10">{nav.label}</span>
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-primary rounded-full transition-all duration-400 group-hover/nav:w-3/4" />
-            </Button>
-          ))}
-          <Button variant="ghost" className="text-muted-foreground hover:text-primary transition-all duration-300" onClick={() => navigate("/auth")}>Sign In</Button>
-          <Button onClick={() => navigate("/auth")} className="group/btn relative overflow-hidden shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.04] active:scale-[0.98] transition-all duration-300">
-            <span className="relative z-10 flex items-center">
-              Get Started <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover/btn:translate-x-1" />
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-teal-600 to-primary bg-[length:200%_100%] animate-gradient-shift opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500" />
-          </Button>
+        <nav className="ml-auto flex items-center gap-1">
+          <NavLink label="Features" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} />
+          <NavLink label="How It Works" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} />
+          
+          <button 
+            className="text-sm text-muted-foreground font-medium px-4 py-2 rounded-xl hover:text-foreground hover:bg-primary/5 transition-all duration-300 ml-1"
+            onClick={() => navigate("/auth")}
+          >
+            Sign In
+          </button>
+
+          <PremiumButton variant="primary" className="ml-2 !h-10 !px-6 !text-sm !rounded-xl" onClick={() => navigate("/auth")}>
+            Get Started <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+          </PremiumButton>
         </nav>
       </header>
 
@@ -351,10 +411,10 @@ export default function Index() {
           {/* Animated background layers */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08),transparent_60%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--primary)/0.05),transparent_60%)]" />
-          <div className="absolute inset-0 opacity-[0.015]" style={{
+          <div className="absolute inset-0 opacity-[0.012]" style={{
             backgroundImage: 'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
             backgroundSize: '60px 60px',
-            transform: `translateY(${scrollY * 0.08}px)`,
+            transform: `translateY(${scrollY * 0.06}px)`,
           }} />
 
           {/* Morphing blobs */}
@@ -373,44 +433,54 @@ export default function Index() {
 
           <div className="container px-4 md:px-6 max-w-5xl mx-auto text-center relative">
             <div className={`transition-all duration-1000 ${heroRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              {/* Badge with shimmer */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium mb-8 border border-border hover:border-primary/40 transition-all duration-500 cursor-default group relative overflow-hidden">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-card border border-border text-sm font-medium mb-10 hover:border-primary/40 transition-all duration-500 cursor-default group relative overflow-hidden shadow-sm">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-shimmer bg-[length:200%_100%] opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Sparkles className="w-3.5 h-3.5 text-primary transition-transform duration-700 group-hover:rotate-[360deg] relative z-10" />
-                <span className="transition-colors duration-300 group-hover:text-primary relative z-10">Modern HR Management Platform</span>
-                <Activity className="w-3 h-3 text-primary animate-pulse relative z-10" />
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse relative z-10" />
+                <span className="transition-colors duration-300 group-hover:text-primary relative z-10 text-muted-foreground">Modern HR Management Platform</span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground/50 relative z-10" />
               </div>
 
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-foreground mb-6 leading-[1.05]">
+              <h1 className="text-4xl md:text-6xl lg:text-[4.5rem] font-black tracking-[-0.03em] text-foreground mb-7 leading-[1.08]">
                 The Modern Way to
                 <br />
-                <span className="text-primary relative inline-block">
+                <span className="text-gradient-primary relative inline-block">
                   {heroRef.inView ? <TypingText text="Manage Your Workforce" inView={heroRef.inView} /> : "Manage Your Workforce"}
-                  <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none">
-                    <path d="M2 8C50 2 100 2 150 6C200 10 250 4 298 8" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" className="opacity-30" />
-                  </svg>
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed">
+              <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-14 leading-relaxed font-normal">
                 From attendance tracking to payroll processing, AdiCorp gives you the tools to manage your entire team efficiently — so you can focus on growing your business.
               </p>
 
-              {/* CTA Buttons with magnetic effect */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <MagneticButton className="inline-flex items-center justify-center text-base px-8 h-13 rounded-lg bg-primary text-primary-foreground font-medium shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.04] active:scale-[0.98] transition-all duration-300 relative overflow-hidden group/cta" onClick={() => navigate("/auth")}>
-                  <span className="relative z-10 flex items-center">
-                    Start Free — No Card Required
-                    <Rocket className="w-4 h-4 ml-2 transition-all duration-500 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-0.5 group-hover/cta:rotate-[-15deg]" />
-                  </span>
-                  {/* Shimmer sweep */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-foreground/15 to-transparent -translate-x-full group-hover/cta:translate-x-full transition-transform duration-700 ease-out" />
-                </MagneticButton>
+              {/* CTA Buttons — Premium */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <PremiumButton variant="primary" onClick={() => navigate("/auth")}>
+                  Start Free — No Card Required
+                  <Rocket className="w-[18px] h-[18px] transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-0.5 group-hover:rotate-[-15deg]" />
+                </PremiumButton>
 
-                <MagneticButton className="inline-flex items-center justify-center text-base px-8 h-13 rounded-lg border border-border bg-card text-foreground font-medium hover:bg-primary/5 hover:border-primary/40 transition-all duration-300 group/demo" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>
-                  <Play className="w-4 h-4 mr-2 text-primary transition-all duration-500 group-hover/demo:scale-125 group-hover/demo:text-primary" />
+                <PremiumButton variant="glass" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>
+                  <Play className="w-[18px] h-[18px] text-primary" />
                   See How It Works
-                </MagneticButton>
+                </PremiumButton>
+              </div>
+
+              {/* Social proof line */}
+              <div className="mt-10 flex items-center justify-center gap-3">
+                <div className="flex -space-x-2.5">
+                  {["SA", "OF", "FK", "AM"].map((initials, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-primary/10 border-2 border-background flex items-center justify-center text-[10px] font-bold text-primary">
+                      {initials}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">500+</span> companies trust us
+                </div>
+                <div className="flex gap-0.5">
+                  {[1,2,3,4,5].map(i => <Star key={i} className="w-3.5 h-3.5 fill-primary text-primary" />)}
+                </div>
               </div>
 
               {/* Dashboard mockup */}
@@ -521,7 +591,6 @@ export default function Index() {
                       onMouseEnter={() => setHoveredStat(i)}
                       onMouseLeave={() => setHoveredStat(null)}
                     >
-                      {/* Background glow on hover */}
                       <div className={`absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} />
                       <div className="relative z-10">
                         <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center transition-all duration-500 ${isHovered ? 'bg-primary scale-110 rotate-6 shadow-lg shadow-primary/30' : 'group-hover:bg-primary/15 group-hover:scale-105'}`}>
@@ -547,14 +616,14 @@ export default function Index() {
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-5">
                   <Cpu className="w-3.5 h-3.5" /> Core Features
                 </div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5">Everything You Need</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5 tracking-tight">Everything You Need</h2>
                 <p className="text-muted-foreground max-w-xl mx-auto text-lg leading-relaxed">
                   Comprehensive tools to manage your entire workforce from a single, intuitive dashboard.
                 </p>
               </div>
             </StaggeredReveal>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {features.map((feature, i) => {
                 const Icon = feature.icon;
                 const isHovered = hoveredFeature === i;
@@ -579,13 +648,11 @@ export default function Index() {
                           <h3 className="text-lg font-bold text-foreground mb-2 transition-colors duration-300 group-hover:text-primary">{feature.title}</h3>
                           <p className="text-sm text-muted-foreground leading-relaxed mb-5">{feature.description}</p>
                           
-                          {/* Hover reveal link */}
                           <div className={`flex items-center gap-2 text-primary text-sm font-semibold transition-all duration-500 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}>
                             <span>Explore Feature</span>
                             <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                           </div>
 
-                          {/* Bottom progress line */}
                           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent rounded-b-2xl transition-all duration-700" style={{ opacity: isHovered ? 1 : 0, transform: isHovered ? 'scaleX(1)' : 'scaleX(0)' }} />
                         </div>
                       </TiltCard>
@@ -606,30 +673,27 @@ export default function Index() {
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-5">
                   <Layers className="w-3.5 h-3.5" /> Simple Steps
                 </div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5">Up and Running in Minutes</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5 tracking-tight">Up and Running in Minutes</h2>
                 <p className="text-muted-foreground max-w-xl mx-auto text-lg">
                   Get your HR operations streamlined in four simple steps.
                 </p>
               </div>
             </StaggeredReveal>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
               {howItWorks.map((item, i) => {
                 const StepIcon = item.icon;
                 const isActive = activeStep === i;
                 return (
                   <StaggeredReveal key={item.step} inView={howItWorksRef.inView} delay={200 + i * 120}>
                     <div className="relative group cursor-pointer" onClick={() => setActiveStep(i)}>
-                      {/* Connecting line */}
                       {i < howItWorks.length - 1 && (
                         <div className="hidden lg:block absolute top-10 left-[calc(100%_-_12px)] w-[calc(100%_-_40px)] h-[2px] z-0 overflow-hidden rounded-full">
                           <div className={`h-full rounded-full transition-all duration-1000 ease-out ${i < activeStep ? 'bg-primary w-full' : 'bg-border w-full'}`} />
                         </div>
                       )}
                       <div className={`relative rounded-2xl p-6 transition-all duration-500 border overflow-hidden ${isActive ? 'bg-card border-primary/50 shadow-2xl shadow-primary/10 -translate-y-2' : 'bg-card border-border hover:border-primary/20 hover:shadow-lg hover:-translate-y-1'}`}>
-                        {/* Active background pulse */}
                         {isActive && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />}
-                        
                         <div className="relative z-10">
                           <div className="flex items-center gap-3 mb-4">
                             <div className={`relative w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black transition-all duration-500 ${isActive ? 'bg-primary text-primary-foreground scale-110 shadow-lg shadow-primary/30 rotate-3' : 'bg-primary/10 text-primary group-hover:bg-primary/20 group-hover:scale-105'}`}>
@@ -659,11 +723,11 @@ export default function Index() {
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-5">
                     <Zap className="w-3.5 h-3.5" /> Advantages
                   </div>
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5">Built for Modern Teams</h2>
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5 tracking-tight">Built for Modern Teams</h2>
                   <p className="text-muted-foreground mb-10 leading-relaxed text-lg">
                     AdiCorp helps organizations of all sizes automate HR processes, reduce errors, and focus on what matters most — their people.
                   </p>
-                  <ul className="space-y-3">
+                  <ul className="space-y-2">
                     {benefits.map((benefit, i) => {
                       const BenefitIcon = benefit.icon;
                       return (
@@ -676,9 +740,11 @@ export default function Index() {
                       );
                     })}
                   </ul>
-                  <MagneticButton className="mt-10 inline-flex items-center justify-center px-8 h-12 rounded-lg bg-primary text-primary-foreground font-medium shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.04] active:scale-[0.98] transition-all duration-300 group/btn" onClick={() => navigate("/auth")}>
-                    Get Started Free <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
-                  </MagneticButton>
+                  <div className="mt-10">
+                    <PremiumButton variant="primary" onClick={() => navigate("/auth")}>
+                      Get Started Free <ArrowRight className="w-4 h-4 transition-transform duration-300" />
+                    </PremiumButton>
+                  </div>
                 </div>
               </StaggeredReveal>
 
@@ -724,23 +790,22 @@ export default function Index() {
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-5">
                   <Star className="w-3.5 h-3.5" /> Testimonials
                 </div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5">Loved by HR Teams</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5 tracking-tight">Loved by HR Teams</h2>
                 <p className="text-muted-foreground max-w-xl mx-auto text-lg">
                   See what our customers have to say about their experience with AdiCorp.
                 </p>
               </div>
             </StaggeredReveal>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-5">
               {testimonials.map((t, i) => (
                 <StaggeredReveal key={t.name} inView={testimonialsRef.inView} delay={150 + i * 120}>
-                  <TiltCard className="bg-card border border-border rounded-2xl group h-full">
+                  <TiltCard className="bg-card border border-border rounded-2xl group h-full hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500">
                     <div className="p-7 relative h-full flex flex-col">
-                      {/* Animated quote mark */}
                       <div className="absolute top-4 right-6 text-7xl font-serif text-primary/8 leading-none select-none transition-all duration-700 group-hover:scale-150 group-hover:text-primary/15 group-hover:-translate-y-2">"</div>
                       <div className="flex gap-1 mb-5">
                         {Array.from({ length: t.rating }).map((_, j) => (
-                          <Star key={j} className="w-4 h-4 fill-primary text-primary transition-all duration-500 group-hover:scale-125" style={{ transitionDelay: `${j * 100}ms` }} />
+                          <Star key={j} className="w-4 h-4 fill-primary text-primary transition-all duration-500 group-hover:scale-125" style={{ transitionDelay: `${j * 80}ms` }} />
                         ))}
                       </div>
                       <p className="text-sm text-foreground leading-relaxed mb-6 italic relative z-10 flex-1">"{t.quote}"</p>
@@ -769,7 +834,7 @@ export default function Index() {
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-5">
                   <Zap className="w-3.5 h-3.5" /> FAQ
                 </div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5">Common Questions</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-foreground mb-5 tracking-tight">Common Questions</h2>
               </div>
             </StaggeredReveal>
 
@@ -816,23 +881,24 @@ export default function Index() {
 
           <div className="container px-4 md:px-6 max-w-3xl mx-auto text-center relative">
             <StaggeredReveal inView={ctaRef.inView}>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-primary-foreground mb-6">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-primary-foreground mb-6 tracking-tight">
                 Ready to Transform Your HR?
               </h2>
               <p className="text-primary-foreground/80 mb-12 max-w-xl mx-auto leading-relaxed text-lg">
                 Start managing your workforce smarter. Get in touch via WhatsApp for instant onboarding support.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <MagneticButton className="inline-flex items-center justify-center text-base px-8 h-13 rounded-lg bg-secondary text-secondary-foreground font-semibold hover:scale-[1.05] active:scale-[0.98] transition-all duration-300 shadow-xl group/cta" onClick={() => navigate("/auth")}>
-                  Create Your Account <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-300 group-hover/cta:translate-x-1.5" />
-                </MagneticButton>
-                <MagneticButton
-                  className="inline-flex items-center justify-center text-base px-8 h-13 rounded-lg bg-primary-foreground/10 border border-primary-foreground/30 text-primary-foreground font-semibold hover:bg-primary-foreground/20 hover:scale-[1.05] active:scale-[0.98] transition-all duration-300 group/wa shadow-lg"
+                <PremiumButton variant="cta-invert" onClick={() => navigate("/auth")}>
+                  Create Your Account <ArrowRight className="w-4 h-4" />
+                </PremiumButton>
+                <PremiumButton
+                  variant="glass"
+                  className="!bg-primary-foreground/10 !border-primary-foreground/25 !text-primary-foreground hover:!bg-primary-foreground/20 hover:!border-primary-foreground/40"
                   onClick={() => window.open(`https://wa.me/${whatsappNumber}?text=Hi! I'm interested in AdiCorp HR Management.`, '_blank')}
                 >
-                  <MessageCircle className="w-4 h-4 mr-2 transition-all duration-500 group-hover/wa:rotate-12 group-hover/wa:scale-110" />
+                  <MessageCircle className="w-[18px] h-[18px]" />
                   Chat on WhatsApp
-                </MagneticButton>
+                </PremiumButton>
               </div>
               <p className="text-primary-foreground/50 text-sm mt-8 font-medium">Free to use · No credit card required · Instant setup</p>
             </StaggeredReveal>
@@ -845,12 +911,11 @@ export default function Index() {
         href={`https://wa.me/${whatsappNumber}?text=Hi! I'm interested in AdiCorp HR Management.`}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg shadow-[#25D366]/30 hover:scale-110 hover:shadow-xl hover:shadow-[#25D366]/40 active:scale-95 transition-all duration-300 group animate-glow-pulse"
-        style={{ '--tw-shadow-color': '#25D366' } as any}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] rounded-2xl flex items-center justify-center shadow-lg shadow-[#25D366]/30 hover:scale-110 hover:shadow-xl hover:shadow-[#25D366]/40 active:scale-95 transition-all duration-300 group"
       >
-        <MessageCircle className="w-6 h-6 text-primary-foreground transition-transform duration-500 group-hover:rotate-[360deg]" />
+        <MessageCircle className="w-6 h-6 text-primary-foreground transition-transform duration-500 group-hover:rotate-12" />
         <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-destructive rounded-full border-2 border-background animate-pulse" />
-        <span className="absolute right-full mr-3 px-3 py-2 bg-card border border-border rounded-xl text-xs text-foreground font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl pointer-events-none group-hover:translate-x-0 translate-x-2">
+        <span className="absolute right-full mr-3 px-4 py-2.5 bg-card border border-border rounded-2xl text-xs text-foreground font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-xl pointer-events-none group-hover:translate-x-0 translate-x-2">
           Chat with us! 💬
         </span>
       </a>
@@ -858,9 +923,9 @@ export default function Index() {
       {/* ── BACK TO TOP ── */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed bottom-6 left-6 z-50 w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center shadow-lg transition-all duration-500 hover:border-primary/40 hover:scale-110 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 active:scale-95 ${scrollY > 400 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+        className={`fixed bottom-6 left-6 z-50 w-10 h-10 bg-card border border-border rounded-xl flex items-center justify-center shadow-lg transition-all duration-500 hover:border-primary/40 hover:scale-110 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 active:scale-95 ${scrollY > 400 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
       >
-        <ChevronDown className="w-4 h-4 text-muted-foreground rotate-180" />
+        <ChevronUp className="w-4 h-4 text-muted-foreground" />
       </button>
 
       {/* ── FOOTER ── */}
