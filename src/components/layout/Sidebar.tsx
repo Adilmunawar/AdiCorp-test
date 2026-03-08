@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   Calendar, Users, BarChart, Settings, Clock, ChartPie,
   UserCog, LogOut, Home, Shield, FileText, ChevronLeft, 
-  ChevronRight, Fingerprint, Lock
+  ChevronRight, Fingerprint, Lock, CalendarDays, Timer
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -15,7 +15,9 @@ const navItems = [
   { name: "Dashboard", icon: Home, path: "/dashboard", group: "main" },
   { name: "Employees", icon: Users, path: "/employees", group: "main" },
   { name: "Attendance", icon: Clock, path: "/attendance", group: "main" },
+  { name: "Leave Management", icon: CalendarDays, path: "/leave-management", group: "hr" },
   { name: "Salary", icon: BarChart, path: "/salary", group: "finance" },
+  { name: "Overtime", icon: Timer, path: "/overtime", group: "finance" },
   { name: "Reports", icon: ChartPie, path: "/reports", group: "finance" },
   { name: "Working Days", icon: Calendar, path: "/working-days", group: "config" },
   { name: "Events", icon: Shield, path: "/events", group: "config" },
@@ -25,6 +27,7 @@ const navItems = [
 
 const groupLabels: Record<string, string> = {
   main: "Overview",
+  hr: "HR",
   finance: "Finance",
   config: "Configuration", 
   system: "System",
