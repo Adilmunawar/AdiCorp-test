@@ -299,7 +299,7 @@ export default function Index() {
 
   const marqueeRow1 = ["Employee Onboarding", "Payroll Automation", "Leave Management", "Shift Scheduling", "Performance Reviews", "Compliance Tracking"];
   const marqueeRow2 = ["Tax Calculations", "Time Tracking", "Custom Reports", "Role Management", "Overtime Rules", "Multi-Currency"];
-  const whatsappNumber = "923001234567";
+  const whatsappNumber = "923244965220";
 
   const particles = Array.from({ length: 12 }, (_, i) => ({
     left: `${Math.random() * 100}%`,
