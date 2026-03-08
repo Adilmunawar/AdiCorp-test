@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <CardTitle className="text-xl">Something went wrong</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <p className="text-white/70">
+              <p className="text-muted-foreground">
                 An unexpected error occurred. Please try again or contact support if the problem persists.
               </p>
               {process.env.NODE_ENV === 'development' && this.state.error && (
@@ -58,10 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   </p>
                 </div>
               )}
-              <Button 
-                onClick={this.handleRetry}
-                className="bg-adicorp-purple hover:bg-adicorp-purple-dark"
-              >
+              <Button onClick={this.handleRetry}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
