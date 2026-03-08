@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -81,22 +80,18 @@ export default function CurrencySettings() {
 
   const fetchCurrencySettings = async () => {
     if (!userProfile?.company_id) return;
-
     try {
       const { data, error } = await supabase
         .from('companies')
         .select('currency')
         .eq('id', userProfile.company_id)
         .single();
-
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching currency settings:', error);
         return;
       }
-
       if (data?.currency) {
         setSelectedCurrency(data.currency);
-        // Sync with localStorage immediately
         localStorage.setItem('app_currency', data.currency);
       }
     } catch (error) {
@@ -106,36 +101,23 @@ export default function CurrencySettings() {
 
   const handleSave = async () => {
     if (!userProfile?.company_id) return;
-
     setLoading(true);
     try {
       const { error } = await supabase
         .from('companies')
         .update({ currency: selectedCurrency })
         .eq('id', userProfile.company_id);
-
       if (error) throw error;
-
       const currency = CURRENCIES.find(c => c.code === selectedCurrency);
       toast({
         title: "Currency Updated",
         description: `Currency has been changed to ${currency?.name} (${currency?.symbol}). The page will reload to apply changes.`,
       });
-
-      // Update localStorage immediately
       localStorage.setItem('app_currency', selectedCurrency);
-      
-      // Trigger a page reload to update all currency displays
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      setTimeout(() => { window.location.reload(); }, 1000);
     } catch (error) {
       console.error('Error saving currency:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update currency settings.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update currency settings.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -157,10 +139,10 @@ export default function CurrencySettings() {
             <div>
               <Label className="text-sm font-medium mb-2 block">Select Currency</Label>
               <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-                <SelectTrigger className="bg-adicorp-dark border-white/10">
+                <SelectTrigger className="bg-background border-border">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
-                <SelectContent className="max-h-64 overflow-y-auto bg-adicorp-dark border-white/10">
+                <SelectContent className="max-h-64 overflow-y-auto bg-background border-border">
                   {CURRENCIES.map((currency) => (
                     <SelectItem key={currency.code} value={currency.code}>
                       {currency.symbol} {currency.name} ({currency.code})
@@ -169,41 +151,34 @@ export default function CurrencySettings() {
                 </SelectContent>
               </Select>
             </div>
-
-            <Button 
-              onClick={handleSave}
-              disabled={loading}
-              className="bg-adicorp-purple hover:bg-adicorp-purple-dark"
-            >
+            <Button onClick={handleSave} disabled={loading}>
               {loading ? 'Saving...' : 'Save Currency'}
             </Button>
           </div>
 
           <div className="space-y-4">
             {selectedCurrencyInfo && (
-              <div className="p-4 bg-adicorp-dark/30 rounded-lg border border-white/10">
+              <div className="p-4 bg-muted/50 rounded-lg border border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  <BadgeDollarSign className="h-4 w-4 text-adicorp-purple" />
+                  <BadgeDollarSign className="h-4 w-4 text-primary" />
                   <span className="font-medium">Preview</span>
                 </div>
                 <div className="space-y-2 text-sm">
-                  <p className="text-white/70">
-                    Currency: <span className="text-white font-medium">{selectedCurrencyInfo.name}</span>
+                  <p className="text-muted-foreground">
+                    Currency: <span className="text-foreground font-medium">{selectedCurrencyInfo.name}</span>
                   </p>
-                  <p className="text-white/70">
-                    Symbol: <span className="text-white font-medium">{selectedCurrencyInfo.symbol}</span>
+                  <p className="text-muted-foreground">
+                    Symbol: <span className="text-foreground font-medium">{selectedCurrencyInfo.symbol}</span>
                   </p>
-                  <p className="text-white/70">
-                    Code: <span className="text-white font-medium">{selectedCurrencyInfo.code}</span>
+                  <p className="text-muted-foreground">
+                    Code: <span className="text-foreground font-medium">{selectedCurrencyInfo.code}</span>
                   </p>
-                  <div className="pt-2 border-t border-white/10">
-                    <p className="text-white/70">
-                      Sample: <span className="text-green-400 font-medium">
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-muted-foreground">
+                      Sample: <span className="text-green-600 font-medium">
                         {new Intl.NumberFormat(selectedCurrencyInfo.locale, {
-                          style: 'currency',
-                          currency: selectedCurrencyInfo.code,
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
+                          style: 'currency', currency: selectedCurrencyInfo.code,
+                          minimumFractionDigits: 0, maximumFractionDigits: 0,
                         }).format(50000)}
                       </span>
                     </p>
@@ -211,9 +186,8 @@ export default function CurrencySettings() {
                 </div>
               </div>
             )}
-
             <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-              <p className="text-xs text-blue-300">
+              <p className="text-xs text-blue-600">
                 <strong>Note:</strong> Changing currency will update how amounts are displayed throughout the application. The page will refresh to apply changes immediately.
               </p>
             </div>
