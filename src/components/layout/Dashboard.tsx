@@ -31,18 +31,17 @@ export default function Dashboard({ children, title }: DashboardProps) {
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-muted/30">
+    <div className="h-screen flex overflow-hidden bg-muted/30">
       <Sidebar />
       <div className={cn(
-        "flex-1 min-h-screen flex flex-col transition-all duration-300",
+        "flex-1 h-screen flex flex-col transition-all duration-300",
         sidebarCollapsed ? "ml-[60px]" : "ml-[252px]"
       )}>
         <Header title={title} />
         <main
-          className="flex-1 p-6 overflow-auto transition-all duration-500 ease-out"
+          className="flex-1 p-6 overflow-y-auto transition-all duration-500 ease-out"
           style={{
             opacity: mounted ? 1 : 0,
-            transform: mounted ? "translateY(0)" : "translateY(8px)",
           }}
         >
           <div className="max-w-full">{children}</div>
