@@ -36,6 +36,7 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/confirm" element={<AuthConfirm />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/employees" element={<PrivateRoute><Employees /></PrivateRoute>} />
           <Route path="/employees/:id" element={<PrivateRoute><EmployeeProfile /></PrivateRoute>} />
