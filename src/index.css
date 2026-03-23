@@ -184,3 +184,8 @@ html {
   0% { background-position: 0% 50%; }
   100% { background-position: 200% 50%; }
 }
+
+@keyframes progress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}

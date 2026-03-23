@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Save, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, Save, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { EmployeeRow } from "@/types/supabase";
+import { format, addDays, subDays } from "date-fns";
 
 interface AttendanceRecord {
   id?: string; employeeId: string; employeeName: string; date: string; status: string;
@@ -61,7 +62,7 @@ export default function AttendanceTable() {
 
   useEffect(() => { if (employees.length > 0) fetchAttendance(date); }, [employees, date]);
 
-  const handleDateChange = (newDate: Date | undefined) => { if (newDate) { setDate(newDate); if (employees.length > 0) fetchAttendance(newDate); } };
+  const handleDateChange = (newDate: Date | undefined) => { if (newDate) setDate(newDate); };
   const handleStatusChange = (employeeId: string, status: string) => { setAttendanceData(prev => prev.map(item => item.employeeId === employeeId ? { ...item, status } : item)); };
 
   const saveAttendance = async () => {
@@ -76,61 +77,123 @@ export default function AttendanceTable() {
     } catch (error) { toast({ title: "Error saving attendance", description: "Please try again.", variant: "destructive" }); }
     finally { setSaving(false); }
   };
-  
+
   const getStatusBadge = (status: string) => {
     switch(status) {
-      case 'present': return <Badge className="bg-green-500/20 text-green-600">Present</Badge>;
-      case 'short_leave': return <Badge className="bg-yellow-500/20 text-yellow-600">Short Leave</Badge>;
-      case 'leave': return <Badge className="bg-red-500/20 text-red-600">Leave</Badge>;
-      default: return <Badge className="bg-muted text-muted-foreground">Not Set</Badge>;
+      case 'present': return <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-200/50 font-medium px-3 py-1">Present</Badge>;
+      case 'short_leave': return <Badge className="bg-amber-500/15 text-amber-600 border-amber-200/50 font-medium px-3 py-1">Short Leave</Badge>;
+      case 'leave': return <Badge className="bg-red-500/15 text-red-600 border-red-200/50 font-medium px-3 py-1">Leave</Badge>;
+      default: return <Badge variant="outline" className="text-muted-foreground font-medium px-3 py-1">Not Set</Badge>;
     }
   };
 
   if (loading) {
-    return (<div className="flex justify-center items-center py-8"><div className="flex items-center space-x-2"><Loader2 className="h-8 w-8 animate-spin text-primary" /><span className="text-muted-foreground">Loading employees...</span></div></div>);
+    return (
+      <div className="flex justify-center items-center py-16">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-muted-foreground text-sm">Loading employees...</span>
+        </div>
+      </div>
+    );
   }
 
   if (employees.length === 0) {
-    return (<div className="text-center py-8"><p className="text-muted-foreground">No active employees found. Please add employees first.</p></div>);
+    return (
+      <div className="text-center py-16">
+        <p className="text-muted-foreground">No active employees found. Please add employees first.</p>
+      </div>
+    );
   }
-  
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <Card className="glass-card lg:col-span-1">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-primary" />
+    <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+      {/* Calendar Card */}
+      <Card className="border border-border/60 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2.5 text-base font-semibold">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <CalendarDays className="h-4 w-4 text-primary" />
+            </div>
             Select Date
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex justify-center">
-          <Calendar mode="single" selected={date} onSelect={handleDateChange} className="rounded-md border border-border p-3" />
+        <CardContent className="px-3 pb-4">
+          {/* Quick nav */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setDate(subDays(date, 1))}
+            >
+              <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+              Previous
+            </Button>
+            <button
+              onClick={() => setDate(new Date())}
+              className="text-xs font-medium text-primary hover:text-primary/80 transition-colors px-2 py-1 rounded-md hover:bg-primary/5"
+            >
+              Today
+            </button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => setDate(addDays(date, 1))}
+            >
+              Next
+              <ChevronRight className="h-3.5 w-3.5 ml-1" />
+            </Button>
+          </div>
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={handleDateChange}
+            className="rounded-xl border border-border/40 bg-muted/20 mx-auto"
+          />
+          {/* Selected date display */}
+          <div className="mt-3 mx-1 p-3 rounded-lg bg-primary/5 border border-primary/10">
+            <p className="text-xs text-muted-foreground mb-0.5">Selected Date</p>
+            <p className="text-sm font-semibold text-foreground">{format(date, 'EEEE, MMMM d, yyyy')}</p>
+          </div>
         </CardContent>
       </Card>
-      
-      <Card className="glass-card lg:col-span-3">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">Daily Attendance - {date.toLocaleDateString()}</CardTitle>
-          <Button onClick={saveAttendance} disabled={saving}>
-            {saving ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>) : (<><Save className="h-4 w-4 mr-2" />Save Attendance</>)}
+
+      {/* Attendance Table Card */}
+      <Card className="border border-border/60 shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between pb-4">
+          <div>
+            <CardTitle className="text-lg font-semibold">Daily Attendance</CardTitle>
+            <p className="text-sm text-muted-foreground mt-0.5">{format(date, 'MMMM d, yyyy')}</p>
+          </div>
+          <Button onClick={saveAttendance} disabled={saving} className="shadow-sm">
+            {saving ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
+            ) : (
+              <><Save className="h-4 w-4 mr-2" />Save Attendance</>
+            )}
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="overflow-hidden rounded-lg border border-border">
+          <div className="overflow-hidden rounded-xl border border-border/60">
             <Table>
               <TableHeader>
-                <TableRow className="border-border hover:bg-transparent">
-                  <TableHead>Employee</TableHead><TableHead>Position</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead>
+                <TableRow className="bg-muted/40 hover:bg-muted/40 border-border/60">
+                  <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Employee</TableHead>
+                  <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Position</TableHead>
+                  <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Status</TableHead>
+                  <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {attendanceData.map((record) => (
-                  <TableRow key={record.employeeId} className="border-border hover:bg-muted/30 transition-colors">
-                    <TableCell className="font-medium">{record.employeeName}</TableCell>
-                    <TableCell>{employees.find(emp => emp.id === record.employeeId)?.rank || 'N/A'}</TableCell>
+                  <TableRow key={record.employeeId} className="border-border/40 hover:bg-muted/20 transition-colors">
+                    <TableCell className="font-medium text-foreground">{record.employeeName}</TableCell>
+                    <TableCell className="text-muted-foreground">{employees.find(emp => emp.id === record.employeeId)?.rank || 'N/A'}</TableCell>
                     <TableCell>
                       <Select value={record.status} onValueChange={(value) => handleStatusChange(record.employeeId, value)}>
-                        <SelectTrigger className="w-[140px] bg-background border-border">
+                        <SelectTrigger className="w-[150px] bg-background border-border/60 rounded-lg h-9">
                           <SelectValue>{getStatusBadge(record.status)}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
@@ -140,7 +203,7 @@ export default function AttendanceTable() {
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell>{date.toLocaleDateString()}</TableCell>
+                    <TableCell className="text-muted-foreground">{format(date, 'M/d/yyyy')}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
