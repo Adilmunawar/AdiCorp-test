@@ -21,6 +21,7 @@ import Reports from "./pages/Reports";
 import TimelineLogsPage from "./pages/TimelineLogs";
 import LeaveManagement from "./pages/LeaveManagement";
 import OvertimePage from "./pages/Overtime";
+import AuthConfirm from "./pages/AuthConfirm";
 import NotFound from "./pages/NotFound";
 import BiometricLockScreen from "./components/auth/BiometricLockScreen";
 
