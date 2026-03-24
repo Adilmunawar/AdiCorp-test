@@ -37,14 +37,13 @@ export default function PayslipsGrid({
   onDownloadAll,
   onDownloadIndividual
 }: PayslipsGridProps) {
-  const { currency } = useCurrency();
+  useCurrency();
 
   return (
-    <Card className="glass-card">
+    <Card className="border border-border bg-card shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Individual Payslips - {currentMonthName}</CardTitle>
         <Button 
-          className="bg-primary hover:bg-primary/90"
           onClick={onDownloadAll}
           disabled={downloading || loading}
         >
@@ -68,7 +67,7 @@ export default function PayslipsGrid({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {employeeSalaryData.map((data) => (
-              <Card key={data.employeeId} className="bg-muted/40 border-border">
+              <Card key={data.employeeId} className="bg-muted/30 border-border shadow-sm">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <div>
@@ -78,7 +77,7 @@ export default function PayslipsGrid({
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="border-border hover:bg-muted"
+                      className="border-border"
                       onClick={() => onDownloadIndividual(data)}
                     >
                       <Download className="h-4 w-4" />
@@ -109,7 +108,7 @@ export default function PayslipsGrid({
                     </div>
                     <div className="flex justify-between font-bold pt-2 border-t border-border">
                       <span>Calculated Salary:</span>
-                      <span className="text-green-600">
+                      <span className="text-foreground">
                         {formatCurrencySync(data.calculatedSalary)}
                       </span>
                     </div>

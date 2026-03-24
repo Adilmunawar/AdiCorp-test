@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { ADICORP_LOGO_PATH } from "@/lib/branding";
 import {
   Users, Clock, DollarSign, BarChart3, Shield, Workflow,
   ArrowRight, CheckCircle, ChevronRight, Star, Zap, Globe,
@@ -97,13 +98,13 @@ function PremiumButton({
     onClick?.();
   };
 
-  const baseClasses = "relative overflow-hidden inline-flex items-center justify-center font-semibold tracking-tight transition-all duration-400 rounded-xl cursor-pointer select-none active:scale-[0.97]";
+  const baseClasses = "group relative overflow-hidden inline-flex items-center justify-center font-semibold tracking-tight rounded-2xl cursor-pointer select-none active:scale-[0.98] transition-[transform,box-shadow,filter,background-color,border-color] duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
   const variantClasses = {
-    primary: "bg-primary text-primary-foreground h-13 px-8 text-[15px] gap-2.5 shadow-[0_2px_8px_hsl(var(--primary)/0.25),0_8px_24px_-4px_hsl(var(--primary)/0.2)] hover:shadow-[0_4px_12px_hsl(var(--primary)/0.35),0_16px_40px_-8px_hsl(var(--primary)/0.25)] hover:brightness-110 hover:-translate-y-0.5",
-    glass: "border border-border bg-card/80 backdrop-blur-xl text-foreground h-13 px-8 text-[15px] gap-2.5 shadow-sm hover:shadow-lg hover:border-primary/30 hover:-translate-y-0.5 hover:bg-card",
-    ghost: "text-muted-foreground hover:text-primary hover:bg-primary/5 h-10 px-5 text-sm gap-2",
-    "cta-invert": "bg-card text-foreground h-13 px-8 text-[15px] gap-2.5 shadow-[0_4px_16px_hsl(var(--foreground)/0.1)] hover:shadow-[0_8px_32px_hsl(var(--foreground)/0.15)] hover:-translate-y-0.5",
+    primary: "bg-primary text-primary-foreground h-12 px-8 text-[15px] gap-2.5 border border-primary/30 shadow-[0_10px_24px_-12px_hsl(var(--primary)/0.75),0_2px_8px_hsl(var(--primary)/0.35)] hover:shadow-[0_18px_36px_-14px_hsl(var(--primary)/0.85),0_6px_14px_hsl(var(--primary)/0.4)] hover:-translate-y-0.5",
+    glass: "border border-border/80 bg-card/85 backdrop-blur-xl text-foreground h-12 px-8 text-[15px] gap-2.5 shadow-[0_8px_22px_-18px_hsl(var(--foreground)/0.5)] hover:shadow-[0_16px_28px_-18px_hsl(var(--foreground)/0.55)] hover:border-primary/30 hover:-translate-y-0.5 hover:bg-card",
+    ghost: "text-muted-foreground hover:text-foreground bg-transparent h-10 px-5 text-sm gap-2 border border-transparent hover:border-border hover:bg-card/80 hover:-translate-y-0.5",
+    "cta-invert": "bg-card text-foreground h-12 px-8 text-[15px] gap-2.5 border border-transparent shadow-[0_10px_24px_-14px_hsl(var(--foreground)/0.45)] hover:shadow-[0_18px_36px_-16px_hsl(var(--foreground)/0.55)] hover:border-border/70 hover:-translate-y-0.5",
   };
 
   return (
@@ -115,6 +116,10 @@ function PremiumButton({
       onMouseLeave={() => setPos({ x: 0, y: 0 })}
       onClick={handleClick}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 -translate-x-[135%] bg-[linear-gradient(110deg,transparent_30%,hsl(var(--foreground)/0.14)_50%,transparent_70%)] transition-all duration-700 group-hover:opacity-100 group-hover:translate-x-[135%]"
+      />
       {ripples.map(r => (
         <span
           key={r.id}
@@ -323,7 +328,7 @@ export default function Index() {
       <header className={`px-4 lg:px-8 h-16 flex items-center bg-background/80 backdrop-blur-2xl sticky top-0 z-50 transition-all duration-500 ${scrollY > 50 ? 'border-b border-border/50 shadow-sm' : 'border-b border-transparent'}`}>
         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate("/")}>
           <div className="relative">
-            <img src="/AdilMunawar-Uploads/31e3e556-6bb0-44a2-bd2d-6d5fa04f0ba9.png" alt="AdiCorp Logo" className="w-9 h-9 rounded-xl object-cover transition-all duration-300 group-hover:scale-105" />
+            <img src={ADICORP_LOGO_PATH} alt="AdiCorp Logo" className="w-9 h-9 rounded-xl object-cover transition-all duration-300 group-hover:scale-105" />
           </div>
           <span className="text-lg font-bold text-foreground tracking-tight">AdiCorp</span>
         </div>
@@ -331,12 +336,9 @@ export default function Index() {
           <NavLink label="Features" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} />
           <NavLink label="How It Works" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} />
           
-          <button 
-            className="text-sm text-muted-foreground font-medium px-4 py-2 rounded-xl hover:text-foreground hover:bg-accent transition-all duration-300 ml-1"
-            onClick={() => navigate("/auth")}
-          >
+          <PremiumButton variant="ghost" className="ml-1 !h-10 !px-5 !rounded-xl" onClick={() => navigate("/auth")}> 
             Sign In
-          </button>
+          </PremiumButton>
 
           <PremiumButton variant="primary" className="ml-2 !h-10 !px-6 !text-sm !rounded-xl" onClick={() => navigate("/auth")}>
             Get Started <ArrowRight className="w-3.5 h-3.5" />
@@ -771,7 +773,7 @@ export default function Index() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
             <div>
               <div className="flex items-center gap-2.5 mb-4 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                <img src="/AdilMunawar-Uploads/31e3e556-6bb0-44a2-bd2d-6d5fa04f0ba9.png" alt="AdiCorp" className="w-8 h-8 rounded-lg object-cover transition-all duration-300 group-hover:scale-105" />
+                <img src={ADICORP_LOGO_PATH} alt="AdiCorp" className="w-8 h-8 rounded-lg object-cover transition-all duration-300 group-hover:scale-105" />
                 <span className="font-bold text-foreground">AdiCorp</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">

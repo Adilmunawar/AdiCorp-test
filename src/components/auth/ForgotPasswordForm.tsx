@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Mail, CheckCircle } from "lucide-react";
+import { getAuthRedirectUrl } from "@/lib/authRedirect";
 
 interface ForgotPasswordFormProps { onBack: () => void; }
 
@@ -15,7 +16,7 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true); setError("");
-    try { const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth?mode=reset` }); if (error) throw error; setSuccess(true); }
+    try { const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: getAuthRedirectUrl("/auth?mode=reset") }); if (error) throw error; setSuccess(true); }
     catch (error: any) { setError(error.message || "Failed to send reset email"); } finally { setLoading(false); }
   };
 

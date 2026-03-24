@@ -9,6 +9,7 @@ import LeaveBalanceOverview from "@/components/leave/LeaveBalanceOverview";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 export default function LeaveManagement() {
   const [activeTab, setActiveTab] = useState("requests");
@@ -19,19 +20,24 @@ export default function LeaveManagement() {
   return (
     <Dashboard title="Leave Management">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Leave Management</h2>
-            <p className="text-sm text-muted-foreground">Manage leave requests, types, and balances</p>
+        <div className="rounded-3xl border border-border bg-card p-5 md:p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-2xl font-bold text-foreground">Leave Management</h2>
+                {isAdmin && <Badge variant="secondary">Admin View</Badge>}
+              </div>
+              <p className="text-sm text-muted-foreground">Manage leave requests, balances, and leave policies in one streamlined workspace.</p>
+            </div>
+            <Button onClick={() => setShowRequestForm(true)} className="gap-2 w-full md:w-auto">
+              <Plus className="h-4 w-4" />
+              New Leave Request
+            </Button>
           </div>
-          <Button onClick={() => setShowRequestForm(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Leave Request
-          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid mb-4 ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <TabsList className={`grid mb-4 h-auto gap-1 ${isAdmin ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
             <TabsTrigger value="requests" className="gap-2">
               <CalendarDays className="h-4 w-4" />
               Requests
@@ -48,16 +54,16 @@ export default function LeaveManagement() {
             )}
           </TabsList>
 
-          <TabsContent value="requests">
+          <TabsContent value="requests" className="animate-fade-in">
             <LeaveRequestsList />
           </TabsContent>
 
-          <TabsContent value="balances">
+          <TabsContent value="balances" className="animate-fade-in">
             <LeaveBalanceOverview />
           </TabsContent>
 
           {isAdmin && (
-            <TabsContent value="config">
+            <TabsContent value="config" className="animate-fade-in">
               <LeaveTypesConfig />
             </TabsContent>
           )}

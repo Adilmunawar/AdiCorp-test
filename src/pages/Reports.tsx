@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, addMonths, subMonths } from "date-fns";
 import { formatCurrencySync } from "@/utils/salaryCalculations";
 import { ReportDataService } from "@/services/reportDataService";
+import { useNavigate } from "react-router-dom";
 
 interface AttendanceReport {
   employeeId: string; employeeName: string; rank: string; monthlySalary: number;
@@ -32,6 +33,7 @@ export default function ReportsPage() {
   const [stats, setStats] = useState<ReportStats>({ totalCalculatedSalary: 0, totalEmployees: 0, averageAttendance: 0, totalWorkingDaysThisMonth: 0 });
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const fetchReportsData = useCallback(async () => {
     if (!userProfile?.company_id) { setLoading(false); return; }
@@ -82,11 +84,29 @@ export default function ReportsPage() {
   const handleRetry = () => { ReportDataService.clearCache(); fetchReportsData(); };
 
   if (!userProfile?.company_id) {
-    return (<Dashboard title="Reports"><div className="text-center py-8"><p className="text-muted-foreground">Please complete company setup to view reports.</p><Button onClick={() => window.location.href = '/settings'} className="mt-4">Go to Settings</Button></div></Dashboard>);
+    return (
+      <Dashboard title="Reports">
+        <div className="max-w-xl mx-auto py-10">
+          <div className="rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
+            <p className="text-muted-foreground">Please complete company setup to view reports.</p>
+            <Button onClick={() => navigate('/settings')} className="mt-4">Go to Settings</Button>
+          </div>
+        </div>
+      </Dashboard>
+    );
   }
 
   if (error && !loading) {
-    return (<Dashboard title="Reports"><div className="text-center py-8"><p className="text-destructive mb-4">{error}</p><Button onClick={handleRetry}><RefreshCw className="mr-2 h-4 w-4" />Retry</Button></div></Dashboard>);
+    return (
+      <Dashboard title="Reports">
+        <div className="max-w-xl mx-auto py-10">
+          <div className="rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button onClick={handleRetry}><RefreshCw className="mr-2 h-4 w-4" />Retry</Button>
+          </div>
+        </div>
+      </Dashboard>
+    );
   }
 
   if (loading) {
@@ -94,39 +114,44 @@ export default function ReportsPage() {
   }
 
   const statCards = [
-    { title: "Total Employees", value: stats.totalEmployees, icon: Users, color: "text-blue-600" },
-    { title: "Average Attendance", value: `${stats.averageAttendance.toFixed(1)} days`, icon: Clock, color: "text-green-600" },
-    { title: "Total Calculated Salary", value: formatCurrencySync(stats.totalCalculatedSalary), icon: TrendingUp, color: "text-violet-600" },
-    { title: "Working Days This Month", value: `${stats.totalWorkingDaysThisMonth} days`, icon: Calendar, color: "text-orange-600" },
+    { title: "Total Employees", value: stats.totalEmployees, icon: Users },
+    { title: "Average Attendance", value: `${stats.averageAttendance.toFixed(1)} days`, icon: Clock },
+    { title: "Total Calculated Salary", value: formatCurrencySync(stats.totalCalculatedSalary), icon: TrendingUp },
+    { title: "Working Days This Month", value: `${stats.totalWorkingDaysThisMonth} days`, icon: Calendar },
   ];
 
   return (
     <Dashboard title="Reports">
-      {/* Month Navigation */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}>
-            <ChevronLeft className="h-4 w-4" /> Previous
-          </Button>
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-foreground">{format(currentMonth, "MMMM yyyy")}</h2>
+      <div className="rounded-3xl border border-border bg-card p-5 md:p-6 mb-6 shadow-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Reports Center</h2>
+            <p className="text-sm text-muted-foreground mt-1">Operational salary and attendance insights with downloadable reports.</p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}>
-            Next <ChevronRight className="h-4 w-4" />
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}>
+              <ChevronLeft className="h-4 w-4" /> Previous
+            </Button>
+            <div className="text-center min-w-36">
+              <h2 className="text-base font-semibold text-foreground">{format(currentMonth, "MMMM yyyy")}</h2>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}>
+              Next <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button onClick={() => setCurrentMonth(new Date())}>Current Month</Button>
+          </div>
         </div>
-        <Button onClick={() => setCurrentMonth(new Date())}>Current Month</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="glass-card group hover:shadow-lg hover:border-primary/20 transition-all duration-300 hover:-translate-y-0.5">
+            <Card key={stat.title} className="border border-border bg-card shadow-sm group hover:shadow-md hover:border-primary/20 transition-all duration-300 hover:-translate-y-0.5">
               <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex items-center">
-                  <Icon className={`h-5 w-5 mr-2 ${stat.color} transition-transform duration-300 group-hover:scale-110`} />
+                  <Icon className="h-5 w-5 mr-2 text-primary transition-transform duration-300 group-hover:scale-110" />
                   <span className="text-2xl font-bold text-foreground">{stat.value}</span>
                 </div>
               </CardContent>
@@ -136,14 +161,14 @@ export default function ReportsPage() {
       </div>
       
       <Tabs defaultValue="attendance-report" className="space-y-4">
-        <TabsList className="grid grid-cols-2 mb-4">
+        <TabsList className="grid grid-cols-1 sm:grid-cols-2 mb-4 h-auto gap-1">
           <TabsTrigger value="attendance-report"><FileText className="h-4 w-4 mr-2" />Attendance Report</TabsTrigger>
           <TabsTrigger value="salary-report"><Download className="h-4 w-4 mr-2" />Salary Report</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="attendance-report">
-          <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between">
+        <TabsContent value="attendance-report" className="animate-fade-in">
+          <Card className="border border-border bg-card shadow-sm">
+            <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <CardTitle>Monthly Attendance Report - {format(currentMonth, "MMMM yyyy")}</CardTitle>
               <Button onClick={() => handleDownload('attendance')} disabled={downloading}>
                 {downloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Export
@@ -153,9 +178,9 @@ export default function ReportsPage() {
               {attendanceReport.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground"><p>No attendance data found for {format(currentMonth, "MMMM yyyy")}.</p></div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-xl border border-border bg-background">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/40">
                       <TableRow className="border-border hover:bg-transparent">
                         <TableHead>Employee</TableHead><TableHead>Position</TableHead><TableHead>Present Days</TableHead>
                         <TableHead>Short Leave</TableHead><TableHead>Leave Days</TableHead><TableHead>Actual Working Days</TableHead><TableHead>Performance</TableHead>
@@ -171,10 +196,10 @@ export default function ReportsPage() {
                           <TableCell>{report.leaveDays}</TableCell>
                           <TableCell className="font-bold">{report.actualWorkingDays}</TableCell>
                           <TableCell>
-                            <Badge className={
-                              report.actualWorkingDays >= (stats.totalWorkingDaysThisMonth * 0.9) ? "bg-green-500/20 text-green-600"
-                                : report.actualWorkingDays >= (stats.totalWorkingDaysThisMonth * 0.7) ? "bg-yellow-500/20 text-yellow-600"
-                                : "bg-red-500/20 text-red-600"
+                            <Badge variant={
+                              report.actualWorkingDays >= (stats.totalWorkingDaysThisMonth * 0.9) ? "default"
+                                : report.actualWorkingDays >= (stats.totalWorkingDaysThisMonth * 0.7) ? "secondary"
+                                : "destructive"
                             }>
                               {report.actualWorkingDays >= (stats.totalWorkingDaysThisMonth * 0.9) ? "Excellent" : report.actualWorkingDays >= (stats.totalWorkingDaysThisMonth * 0.7) ? "Good" : "Needs Improvement"}
                             </Badge>
@@ -189,9 +214,9 @@ export default function ReportsPage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="salary-report">
-          <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between">
+        <TabsContent value="salary-report" className="animate-fade-in">
+          <Card className="border border-border bg-card shadow-sm">
+            <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <CardTitle>Salary Report Based on Attendance - {format(currentMonth, "MMMM yyyy")}</CardTitle>
               <Button onClick={() => handleDownload('salary')} disabled={downloading}>
                 {downloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />} Export
@@ -201,9 +226,9 @@ export default function ReportsPage() {
               {attendanceReport.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground"><p>No salary data found for {format(currentMonth, "MMMM yyyy")}.</p></div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-xl border border-border bg-background">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/40">
                       <TableRow className="border-border hover:bg-transparent">
                         <TableHead>Employee</TableHead><TableHead>Position</TableHead><TableHead>Monthly Salary</TableHead>
                         <TableHead>Daily Rate</TableHead><TableHead>Working Days</TableHead><TableHead>Calculated Salary</TableHead><TableHead>Status</TableHead>
@@ -217,8 +242,8 @@ export default function ReportsPage() {
                           <TableCell>{formatCurrencySync(report.monthlySalary)}</TableCell>
                           <TableCell>{formatCurrencySync(report.dailyRate)}</TableCell>
                           <TableCell>{report.actualWorkingDays} / {report.totalWorkingDaysInMonth}</TableCell>
-                          <TableCell className="font-bold text-green-600">{formatCurrencySync(report.calculatedSalary)}</TableCell>
-                          <TableCell><Badge className="bg-blue-500/20 text-blue-600">Calculated</Badge></TableCell>
+                          <TableCell className="font-bold text-foreground">{formatCurrencySync(report.calculatedSalary)}</TableCell>
+                          <TableCell><Badge variant="outline">Calculated</Badge></TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

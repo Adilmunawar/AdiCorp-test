@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { ADICORP_LOGO_PATH } from "@/lib/branding";
 
 export default function AuthForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -54,7 +55,7 @@ export default function AuthForm() {
         <div className="relative z-10 max-w-md space-y-8">
           <div className="flex items-center gap-3">
             <img
-              src="/AdilMunawar-Uploads/31e3e556-6bb0-44a2-bd2d-6d5fa04f0ba9.png"
+              src={ADICORP_LOGO_PATH}
               alt="AdiCorp Logo"
               className="w-12 h-12 rounded-xl object-cover ring-2 ring-primary-foreground/20"
             />
@@ -99,7 +100,7 @@ export default function AuthForm() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 justify-center">
             <img
-              src="/AdilMunawar-Uploads/31e3e556-6bb0-44a2-bd2d-6d5fa04f0ba9.png"
+              src={ADICORP_LOGO_PATH}
               alt="AdiCorp Logo"
               className="w-10 h-10 rounded-xl object-cover"
             />

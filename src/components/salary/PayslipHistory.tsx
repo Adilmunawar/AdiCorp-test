@@ -38,12 +38,21 @@ export default function PayslipHistory() {
     } catch { return `${currency} ${amount.toLocaleString()}`; }
   };
 
-  if (isLoading) return <div className="space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full" />)}</div>;
+  if (isLoading) {
+    return (
+      <Card className="border border-border bg-card shadow-sm">
+        <CardHeader>
+          <Skeleton className="h-6 w-44" />
+        </CardHeader>
+        <CardContent className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" />Payslip History</CardTitle>
+    <Card className="border border-border bg-card shadow-sm">
+      <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <CardTitle className="flex items-center gap-2"><History className="h-5 w-5" />Payslip History <Badge variant="outline">{payslips?.length || 0}</Badge></CardTitle>
         <MonthSelector selectedMonth={selectedMonth} onMonthChange={setSelectedMonth} />
       </CardHeader>
       <CardContent>

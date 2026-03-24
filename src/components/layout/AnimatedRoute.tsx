@@ -11,10 +11,9 @@ export default function AnimatedRoute({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className="transition-all duration-500 ease-out"
+      className="transition-opacity duration-300 ease-out"
       style={{
         opacity: mounted ? 1 : 0,
-        transform: mounted ? "translateY(0)" : "translateY(16px)",
       }}
     >
       {children}

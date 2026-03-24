@@ -9,8 +9,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { Settings, Check, AlertCircle } from "lucide-react";
 import { WorkingDayConfig } from "@/types/events";
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer";
+import BrandLoader from "@/components/common/BrandLoader";
 
 export default function WorkingDaysConfig() {
   const [config, setConfig] = useState<WorkingDayConfig>({
@@ -121,8 +121,29 @@ export default function WorkingDaysConfig() {
     config[day.key as keyof WorkingDayConfig] as boolean
   ).length;
 
+  const applyTemplate = (mode: "mon_fri" | "mon_sat") => {
+    const nextConfig = {
+      ...config,
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: mode === "mon_sat",
+      sunday: false,
+    };
+
+    setConfig(nextConfig);
+    setHasChanges(true);
+  };
+
   if (loading) {
-    return <LoadingSkeleton type="form" count={3} />;
+    return (
+      <BrandLoader
+        message="Loading day management"
+        subtitle="Syncing your company working-day rules"
+      />
+    );
   }
 
   return (
@@ -130,23 +151,29 @@ export default function WorkingDaysConfig() {
       <Card className="glass-card transition-all duration-200 hover:shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-            <Settings className="h-5 w-5 text-adicorp-purple" />
+            <Settings className="h-5 w-5 text-primary" />
             Working Days Configuration
           </CardTitle>
-          <p className="text-white/70 text-sm">
+          <p className="text-sm text-muted-foreground">
             Configure which days are considered working days for your company.
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Summary */}
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-adicorp-purple/10 border border-adicorp-purple/20">
-            <AlertCircle className="h-4 w-4 text-adicorp-purple" />
-            <span className="text-sm text-white/80">
+          <div className="rounded-lg border border-border bg-muted/40 p-3">
+            <p className="text-xs font-medium text-foreground">Quick Templates</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("mon_fri")}>Mon–Fri</Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => applyTemplate("mon_sat")}>Mon–Sat</Button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/10 p-3">
+            <AlertCircle className="h-4 w-4 text-primary" />
+            <span className="text-sm text-muted-foreground">
               {selectedDaysCount} working {selectedDaysCount === 1 ? 'day' : 'days'} per week selected
             </span>
           </div>
 
-          {/* Days Grid - Responsive */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
             {days.map((day) => {
               const isChecked = config[day.key as keyof WorkingDayConfig] as boolean;
@@ -156,10 +183,10 @@ export default function WorkingDaysConfig() {
                   className={`
                     flex flex-col items-center space-y-2 p-3 rounded-lg border transition-all duration-200
                     ${isChecked 
-                      ? 'bg-adicorp-purple/20 border-adicorp-purple/40' 
-                      : 'bg-adicorp-dark/30 border-white/10'
+                      ? 'bg-primary/10 border-primary/40' 
+                      : 'bg-card border-border'
                     }
-                    hover:border-adicorp-purple/60
+                    hover:border-primary/60
                   `}
                 >
                   <Switch
@@ -167,7 +194,6 @@ export default function WorkingDaysConfig() {
                     checked={isChecked}
                     onCheckedChange={(checked) => handleDayChange(day.key as keyof WorkingDayConfig, checked)}
                     aria-label={`Toggle ${day.label} as working day`}
-                    className="data-[state=checked]:bg-adicorp-purple"
                   />
                   <Label 
                     htmlFor={day.key} 
@@ -181,13 +207,12 @@ export default function WorkingDaysConfig() {
             })}
           </div>
 
-          {/* Info Section */}
-          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+          <div className="rounded-lg border border-border bg-muted/40 p-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-blue-400">Important Notes:</p>
-                <ul className="text-sm text-white/70 space-y-1 list-disc list-inside">
+                <p className="text-sm font-medium text-foreground">Important Notes:</p>
+                <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                   <li>Employees will only appear in attendance for configured working days</li>
                   <li>Salary calculations will be based on selected working days</li>
                   <li>Changes take effect immediately after saving</li>
@@ -196,17 +221,16 @@ export default function WorkingDaysConfig() {
             </div>
           </div>
           
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
+          <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row">
             <Button 
               onClick={handleSave}
               disabled={saving || !hasChanges}
-              className="bg-adicorp-purple hover:bg-adicorp-purple-dark disabled:opacity-50 flex-1 sm:flex-none"
+              className="flex-1 sm:flex-none"
               aria-label="Save working days configuration"
             >
               {saving ? (
                 <>
-                  <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-foreground/40 border-t-transparent" />
                   Saving...
                 </>
               ) : (
@@ -224,7 +248,6 @@ export default function WorkingDaysConfig() {
                   fetchConfig();
                   setHasChanges(false);
                 }}
-                className="border-white/20 hover:bg-white/10"
               >
                 Reset Changes
               </Button>

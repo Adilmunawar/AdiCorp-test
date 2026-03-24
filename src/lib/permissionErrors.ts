@@ -1,0 +1,80 @@
+export const PERMISSION_ERROR_EVENT = "app:permission-error";
+
+type PermissionEventDetail = {
+  title: string;
+  description: string;
+  table?: string;
+  signature: string;
+};
+
+type SupabaseErrorPayload = {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+};
+
+const COMPANY_SETUP_TABLES = new Set([
+  "employees",
+  "attendance",
+  "payslips",
+  "leave_requests",
+  "leave_balances",
+  "leave_types",
+  "overtime_records",
+  "overtime_config",
+  "events",
+  "monthly_working_days",
+  "working_days_config",
+  "company_working_settings",
+  "tier_config",
+]);
+
+const normalize = (value: string | undefined): string => (value || "").toLowerCase();
+
+export const extractSupabaseTable = (url: string): string | undefined => {
+  const match = url.match(/\/rest\/v1\/([^?/#]+)/i);
+  return match?.[1];
+};
+
+export const parsePermissionError = (
+  payload: SupabaseErrorPayload | null,
+  table?: string,
+): PermissionEventDetail | null => {
+  if (!payload) return null;
+
+  const message = normalize(payload.message);
+  const details = normalize(payload.details);
+  const hint = normalize(payload.hint);
+  const code = payload.code || "";
+  const full = `${message} ${details} ${hint}`;
+
+  const isRlsOrPermissionError =
+    code === "42501" ||
+    full.includes("row-level security") ||
+    full.includes("permission denied") ||
+    full.includes("insufficient privilege");
+
+  if (!isRlsOrPermissionError) return null;
+
+  const needsCompanySetup =
+    (table ? COMPANY_SETUP_TABLES.has(table) : false) ||
+    full.includes("company_id") ||
+    full.includes("company setup");
+
+  const description = needsCompanySetup
+    ? "You don't have access yet. Next steps: 1) Complete company setup in Settings. 2) If already done, ask an admin to grant the required permissions."
+    : "You don't have permission for this action. Next steps: ask your admin to grant access, then try again.";
+
+  return {
+    title: "Action blocked by permissions",
+    description,
+    table,
+    signature: `${code}:${table || "unknown"}:${message}`,
+  };
+};
+
+export const emitPermissionErrorEvent = (detail: PermissionEventDetail) => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(PERMISSION_ERROR_EVENT, { detail }));
+};

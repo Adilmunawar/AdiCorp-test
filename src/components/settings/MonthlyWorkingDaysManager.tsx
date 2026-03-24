@@ -31,6 +31,20 @@ export default function MonthlyWorkingDaysManager() {
   const { userProfile } = useAuth();
   const { toast } = useToast();
 
+  const clampRange = (value: number, min = 1, max = 31) => Math.min(max, Math.max(min, value));
+
+  const handleWorkingDaysCountChange = (value: string) => {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) return;
+    setWorkingDaysCount(clampRange(parsed));
+  };
+
+  const handleDailyRateDivisorChange = (value: string) => {
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) return;
+    setDailyRateDivisor(clampRange(parsed));
+  };
+
   useEffect(() => {
     if (userProfile?.company_id) {
       fetchMonthlyConfig();
@@ -123,70 +137,76 @@ export default function MonthlyWorkingDaysManager() {
           <CalendarDays className="h-5 w-5 mr-2" />
           Monthly Working Days Manager
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Override default day/divisor values month-by-month for more accurate payroll outcomes.
+        </p>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Calendar for month selection */}
           <div>
-            <Label className="text-sm text-white/60 mb-2 block">Select Month</Label>
+            <Label className="mb-2 block text-sm font-medium">Select Month</Label>
             <Calendar
               mode="single"
               selected={selectedMonth}
               onSelect={(date) => date && setSelectedMonth(date)}
-              className="rounded-md border border-white/10 bg-adicorp-dark/50"
+              className="rounded-md border border-border bg-card p-3 pointer-events-auto"
             />
           </div>
 
-          {/* Configuration form */}
           <div className="space-y-4">
             <div>
-              <Label className="text-white/80">Selected Month</Label>
-              <p className="text-xl font-semibold">
-                {format(selectedMonth, 'MMMM yyyy')}
-              </p>
+              <Label className="text-sm font-medium">Selected Month</Label>
+              <p className="text-xl font-semibold text-foreground">{format(selectedMonth, 'MMMM yyyy')}</p>
+              <p className="text-xs text-muted-foreground">Changes in this panel only affect this month.</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="workingDays" className="text-white/80">
-                  Working Days Count
-                </Label>
+                <Label htmlFor="workingDays">Working Days Count</Label>
                 <Input
                   id="workingDays"
                   type="number"
                   min="1"
                   max="31"
                   value={workingDaysCount}
-                  onChange={(e) => setWorkingDaysCount(parseInt(e.target.value))}
-                  className="bg-adicorp-dark/50 border-white/10"
+                  onChange={(e) => handleWorkingDaysCountChange(e.target.value)}
                 />
-                <p className="text-xs text-white/60 mt-1">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Total working days for this month
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="divisor" className="text-white/80">
-                  Daily Rate Divisor
-                </Label>
+                <Label htmlFor="divisor">Daily Rate Divisor</Label>
                 <Input
                   id="divisor"
                   type="number"
                   min="1"
                   max="31"
                   value={dailyRateDivisor}
-                  onChange={(e) => setDailyRateDivisor(parseInt(e.target.value))}
-                  className="bg-adicorp-dark/50 border-white/10"
+                  onChange={(e) => handleDailyRateDivisorChange(e.target.value)}
                 />
-                <p className="text-xs text-white/60 mt-1">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Number to divide monthly salary by for daily rate (typically 26)
                 </p>
+              </div>
+
+              <div className="rounded-lg border border-border bg-muted/40 p-3">
+                <p className="text-xs font-medium text-foreground">Quick Presets</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button type="button" size="sm" variant="outline" onClick={() => { setWorkingDaysCount(22); setDailyRateDivisor(22); }}>
+                    Standard 22/22
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => { setWorkingDaysCount(26); setDailyRateDivisor(26); }}>
+                    Extended 26/26
+                  </Button>
+                </div>
               </div>
 
               <Button 
                 onClick={saveMonthlyConfig}
                 disabled={loading}
-                className="w-full bg-adicorp-purple hover:bg-adicorp-purple-dark"
+                className="w-full"
               >
                 <Save className="h-4 w-4 mr-2" />
                 {loading ? "Saving..." : "Save Configuration"}
@@ -194,8 +214,8 @@ export default function MonthlyWorkingDaysManager() {
             </div>
 
             {monthlyConfig && (
-              <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                <p className="text-sm text-green-400">
+              <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <p className="text-sm text-primary">
                   ✓ Custom configuration exists for this month
                 </p>
               </div>

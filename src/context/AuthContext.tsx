@@ -3,8 +3,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { toast as sonnerToast } from "sonner";
 import { ProfileRow, CompanyRow } from "@/types/supabase";
+import { getAuthRedirectUrl } from "@/lib/authRedirect";
 
 type UserProfileData = ProfileRow & {
   companies?: CompanyRow | null;
@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
 
   const fetchUserProfile = async (userId: string): Promise<UserProfileData | null> => {
@@ -118,10 +117,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setLoading(false);
               // Clear any cached data
               localStorage.removeItem('app_currency');
-              // Force redirect to auth page
-              if (window.location.pathname !== '/auth' && window.location.pathname !== '/') {
-                window.location.href = '/auth';
-              }
             }
             if (event === 'SIGNED_IN') {
               // Loading will be handled by the profile fetch effect
@@ -138,10 +133,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(initialSession?.user || null);
         }
 
-        if (mounted) {
-          setInitialized(true);
-        }
-
         return () => {
           mounted = false;
           subscription.unsubscribe();
@@ -150,7 +141,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.error("AuthContext - Exception during initialization:", error);
         if (mounted) {
           setLoading(false);
-          setInitialized(true);
         }
       }
     };
@@ -196,7 +186,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signUp = async (email: string, password: string, metadata: any) => {
     try {
       setLoading(true);
-      const redirectUrl = `${window.location.origin}/auth`;
+      const redirectUrl = getAuthRedirectUrl("/auth");
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -239,10 +229,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
       
       console.log("AuthContext - Sign out successful");
-      
-      // Force navigation to auth page
-      window.location.href = '/auth';
-      
+
     } catch (error: any) {
       console.error("AuthContext - Sign out failed:", error);
       toast({
@@ -255,7 +242,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setUser(null);
       setUserProfile(null);
-      window.location.href = '/auth';
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import { Clock, Sparkles, Activity, ArrowUpRight, Zap } from "lucide-react";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import AnalyticsWidget from "@/components/dashboard/AnalyticsWidget";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function StaggerIn({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const [visible, setVisible] = useState(false);
@@ -118,15 +119,15 @@ export default function DashboardPage() {
             ].map((action) => {
               const Icon = action.icon;
               return (
-                <a
+                <Link
                   key={action.label}
-                  href={action.href}
+                  to={action.href}
                   className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-card border border-border text-sm font-medium text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap group"
                 >
                   <Icon className="w-4 h-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6" />
                   {action.label}
                   <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-                </a>
+                </Link>
               );
             })}
           </div>

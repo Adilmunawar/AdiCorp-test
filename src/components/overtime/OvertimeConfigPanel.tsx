@@ -19,7 +19,7 @@ export default function OvertimeConfigPanel() {
     max_daily_hours: 4, max_monthly_hours: 40, requires_approval: true,
   });
 
-  const { data: existing } = useQuery({
+  const { data: existing, isLoading } = useQuery({
     queryKey: ["overtime-config", userProfile?.company_id],
     queryFn: async () => {
       const { data, error } = await supabase.from("overtime_config").select("*").eq("company_id", userProfile!.company_id!).maybeSingle();
@@ -57,19 +57,23 @@ export default function OvertimeConfigPanel() {
   };
 
   return (
-    <Card>
+    <Card className="border border-border bg-card shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Settings2 className="h-5 w-5" />Overtime Configuration</CardTitle>
+        <p className="text-sm text-muted-foreground">Tune multipliers and limits to keep overtime policies consistent and auditable.</p>
       </CardHeader>
       <CardContent className="space-y-6">
+        {isLoading ? (
+          <div className="text-sm text-muted-foreground">Loading configuration...</div>
+        ) : null}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div><Label>Regular Multiplier</Label><Input type="number" step="0.1" value={config.regular_multiplier} onChange={(e) => setConfig({...config, regular_multiplier: Number(e.target.value)})} /></div>
-          <div><Label>Weekend Multiplier</Label><Input type="number" step="0.1" value={config.weekend_multiplier} onChange={(e) => setConfig({...config, weekend_multiplier: Number(e.target.value)})} /></div>
-          <div><Label>Holiday Multiplier</Label><Input type="number" step="0.1" value={config.holiday_multiplier} onChange={(e) => setConfig({...config, holiday_multiplier: Number(e.target.value)})} /></div>
+          <div><Label>Regular Multiplier</Label><Input className="rounded-xl" type="number" step="0.1" value={config.regular_multiplier} onChange={(e) => setConfig({...config, regular_multiplier: Number(e.target.value)})} /></div>
+          <div><Label>Weekend Multiplier</Label><Input className="rounded-xl" type="number" step="0.1" value={config.weekend_multiplier} onChange={(e) => setConfig({...config, weekend_multiplier: Number(e.target.value)})} /></div>
+          <div><Label>Holiday Multiplier</Label><Input className="rounded-xl" type="number" step="0.1" value={config.holiday_multiplier} onChange={(e) => setConfig({...config, holiday_multiplier: Number(e.target.value)})} /></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><Label>Max Daily Hours</Label><Input type="number" value={config.max_daily_hours} onChange={(e) => setConfig({...config, max_daily_hours: Number(e.target.value)})} /></div>
-          <div><Label>Max Monthly Hours</Label><Input type="number" value={config.max_monthly_hours} onChange={(e) => setConfig({...config, max_monthly_hours: Number(e.target.value)})} /></div>
+          <div><Label>Max Daily Hours</Label><Input className="rounded-xl" type="number" value={config.max_daily_hours} onChange={(e) => setConfig({...config, max_daily_hours: Number(e.target.value)})} /></div>
+          <div><Label>Max Monthly Hours</Label><Input className="rounded-xl" type="number" value={config.max_monthly_hours} onChange={(e) => setConfig({...config, max_monthly_hours: Number(e.target.value)})} /></div>
         </div>
         <div className="flex items-center gap-2">
           <Switch checked={config.requires_approval} onCheckedChange={(v) => setConfig({...config, requires_approval: v})} />

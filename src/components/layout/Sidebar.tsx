@@ -1,16 +1,16 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   Calendar, Users, BarChart, Settings, Clock, ChartPie,
-  UserCog, LogOut, Home, Shield, FileText, ChevronLeft, 
-  ChevronRight, Lock, CalendarDays, Timer,
-  Sparkles
+  UserCog, LogOut, Home, Shield, FileText, ChevronLeft,
+  ChevronRight, Lock, CalendarDays, Timer
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ADICORP_LOGO_PATH } from "@/lib/branding";
 import { useAuth } from "@/context/AuthContext";
 import { useBiometric } from "@/hooks/useBiometric";
 import { Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
   { name: "Dashboard", icon: Home, path: "/dashboard", group: "main" },
@@ -34,48 +34,48 @@ const groupLabels: Record<string, string> = {
   system: "System",
 };
 
-export default function Sidebar() {
+interface SidebarProps {
+  collapsed: boolean;
+  mobileOpen: boolean;
+  onToggleCollapse: () => void;
+}
+
+export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: SidebarProps) {
   const location = useLocation();
   const { signOut, user, loading } = useAuth();
   const { isLockEnabled, isRegistered, lockApp } = useBiometric();
-  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true');
+  const isMobile = useIsMobile();
+  const compact = !isMobile && collapsed;
 
-  const toggleCollapsed = () => {
-    const next = !collapsed;
-    setCollapsed(next);
-    localStorage.setItem('sidebar_collapsed', String(next));
-    window.dispatchEvent(new Event('sidebar-toggle'));
-  };
-  
   const groups = Object.keys(groupLabels);
 
   const NavItem = ({ item }: { item: typeof navItems[0] }) => {
-    const isActive = location.pathname === item.path;
+    const isActive = item.path === "/dashboard"
+      ? location.pathname === item.path
+      : location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
     const content = (
       <Link
         to={item.path}
+        data-active={isActive ? "true" : "false"}
         className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative",
-          collapsed && "justify-center px-2.5",
+          "nav-premium-item flex items-center gap-3 rounded-lg px-3 py-2 group",
+          compact && "justify-center px-2.5",
           isActive
             ? "bg-primary text-primary-foreground font-medium"
             : "text-muted-foreground hover:text-foreground hover:bg-accent"
         )}
-        style={isActive ? {
-          boxShadow: '0 1px 3px hsl(var(--primary) / 0.3), 0 4px 12px -2px hsl(var(--primary) / 0.15)'
-        } : undefined}
       >
         <item.icon size={17} className={cn(
           "flex-shrink-0 transition-colors duration-200",
           !isActive && "group-hover:text-primary"
         )} />
-        {!collapsed && (
+        {!compact && (
           <span className="text-[13px] tracking-[-0.01em] truncate">{item.name}</span>
         )}
       </Link>
     );
 
-    if (collapsed) {
+    if (compact) {
       return (
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>{content}</TooltipTrigger>
@@ -90,27 +90,29 @@ export default function Sidebar() {
 
   return (
     <div className={cn(
-      "h-screen fixed left-0 top-0 flex flex-col z-40 transition-all duration-300 border-r border-border/60",
-      collapsed ? "w-[60px]" : "w-[252px]"
+      "h-screen fixed left-0 top-0 flex flex-col z-40 border-r border-border/60 transition-[width,transform] duration-300",
+      isMobile
+        ? cn("w-[272px]", mobileOpen ? "translate-x-0" : "-translate-x-full")
+        : collapsed ? "w-[60px]" : "w-[252px]"
     )} style={{
       background: 'linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.3) 100%)',
     }}>
       {/* Brand */}
       <div className={cn(
         "flex items-center gap-3 border-b border-border/40 transition-all duration-300",
-        collapsed ? "px-2.5 py-4 justify-center" : "px-5 py-4"
+        compact ? "px-2.5 py-4 justify-center" : "px-5 py-4"
       )}>
         <div className="relative flex-shrink-0">
           <div className="w-9 h-9 rounded-lg overflow-hidden ring-1 ring-border/50">
             <img 
-              src="/AdilMunawar-Uploads/31e3e556-6bb0-44a2-bd2d-6d5fa04f0ba9.png" 
+              src={ADICORP_LOGO_PATH}
               alt="AdiCorp Logo" 
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-card" style={{ background: 'hsl(152 69% 53%)' }} />
+          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-card bg-primary" />
         </div>
-        {!collapsed && (
+        {!compact && (
           <div className="min-w-0 flex-1">
             <h1 className="text-sm font-bold text-foreground tracking-tight leading-none">AdiCorp HR</h1>
             <p className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase mt-0.5">Management</p>
@@ -119,13 +121,16 @@ export default function Sidebar() {
       </div>
 
       {/* Collapse toggle */}
-      <button 
-        onClick={toggleCollapsed}
-        className="absolute -right-3 top-[60px] z-50 w-6 h-6 rounded-full bg-card border border-border/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all duration-200 hover:border-primary/30"
-        style={{ boxShadow: '0 1px 4px hsl(var(--foreground) / 0.08)' }}
-      >
-        {collapsed ? <ChevronRight size={11} strokeWidth={2.5} /> : <ChevronLeft size={11} strokeWidth={2.5} />}
-      </button>
+      {!isMobile && (
+        <button
+          onClick={onToggleCollapse}
+          className="absolute -right-3 top-[60px] z-50 w-6 h-6 rounded-full bg-card border border-border/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all duration-200 hover:border-primary/30"
+          style={{ boxShadow: '0 1px 4px hsl(var(--foreground) / 0.08)' }}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <ChevronRight size={11} strokeWidth={2.5} /> : <ChevronLeft size={11} strokeWidth={2.5} />}
+        </button>
+      )}
       
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none' }}>
@@ -134,7 +139,7 @@ export default function Sidebar() {
           if (items.length === 0) return null;
           return (
             <div key={group} className={cn("px-2.5", gi > 0 && "mt-4")}>
-              {!collapsed ? (
+              {!compact ? (
                 <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
                   {groupLabels[group]}
                 </p>
@@ -153,21 +158,21 @@ export default function Sidebar() {
       
       {/* Quick Actions */}
       {isRegistered && isLockEnabled && (
-        <div className={cn("px-2.5 pb-1", collapsed && "px-1.5")}>
+        <div className={cn("px-2.5 pb-1", compact && "px-1.5")}>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <button 
                 onClick={lockApp}
                 className={cn(
-                  "flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-amber-600 hover:bg-amber-500/8 transition-all duration-200 text-[13px]",
-                  collapsed && "justify-center px-2"
+                  "flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200 text-[13px]",
+                  compact && "justify-center px-2"
                 )}
               >
                 <Lock size={15} />
-                {!collapsed && <span>Lock App</span>}
+                {!compact && <span>Lock App</span>}
               </button>
             </TooltipTrigger>
-            {collapsed && <TooltipContent side="right" sideOffset={8}>Lock App</TooltipContent>}
+            {compact && <TooltipContent side="right" sideOffset={8}>Lock App</TooltipContent>}
           </Tooltip>
         </div>
       )}
@@ -175,11 +180,11 @@ export default function Sidebar() {
       {/* User & Logout */}
       <div className={cn(
         "border-t border-border/40 mt-auto transition-all duration-300",
-        collapsed ? "p-2" : "p-3"
+        compact ? "p-2" : "p-3"
       )}>
         <div className={cn(
           "flex items-center gap-2.5 p-2.5 rounded-lg transition-all duration-200",
-          collapsed && "justify-center p-2"
+          compact && "justify-center p-2"
         )} style={{
           background: 'hsl(var(--primary) / 0.04)',
           border: '1px solid hsl(var(--primary) / 0.08)',
@@ -194,7 +199,7 @@ export default function Sidebar() {
               <UserCog size={13} className="text-primary" />
             )}
           </div>
-          {!collapsed && (
+          {!compact && (
             <div className="min-w-0 flex-1">
               <h3 className="text-[13px] font-semibold text-foreground truncate leading-none">
                 {loading ? "Loading..." : user?.email?.split('@')[0] || "Admin"}
@@ -209,15 +214,16 @@ export default function Sidebar() {
             <button 
               className={cn(
                 "flex items-center gap-2.5 px-3 py-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-all duration-200 w-full mt-1 text-[13px]",
-                collapsed && "justify-center px-2"
+                compact && "justify-center px-2"
               )}
               onClick={() => signOut()}
+              type="button"
             >
               <LogOut size={15} className="flex-shrink-0" />
-              {!collapsed && <span className="font-medium">Logout</span>}
+              {!compact && <span className="font-medium">Logout</span>}
             </button>
           </TooltipTrigger>
-          {collapsed && <TooltipContent side="right" sideOffset={8}>Logout</TooltipContent>}
+          {compact && <TooltipContent side="right" sideOffset={8}>Logout</TooltipContent>}
         </Tooltip>
       </div>
     </div>

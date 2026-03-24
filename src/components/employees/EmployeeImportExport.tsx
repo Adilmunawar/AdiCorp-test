@@ -71,27 +71,38 @@ export default function EmployeeImportExport({ onImportComplete, employees }: Em
   };
 
   return (
-    <Card className="glass-card">
-      <CardHeader><CardTitle className="flex items-center gap-2"><FileSpreadsheet className="h-5 w-5" />Import/Export Employees</CardTitle></CardHeader>
+    <Card className="border border-border bg-card shadow-sm">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center">
+            <FileSpreadsheet className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-foreground">Bulk Import / Export</p>
+            <p className="text-xs text-muted-foreground font-normal">Manage employee data with spreadsheet workflows</p>
+          </div>
+        </CardTitle>
+      </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold flex items-center gap-2"><Upload className="h-4 w-4" />Import from Excel</h3>
-          <div className="flex flex-col gap-3">
-            <Button variant="outline" onClick={downloadTemplate} className="w-fit"><Download className="mr-2 h-4 w-4" />Download Template</Button>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-3 rounded-2xl border border-border bg-background p-4">
+            <h3 className="text-sm font-semibold flex items-center gap-2"><Upload className="h-4 w-4 text-primary" />Import from Excel</h3>
+            <Button variant="outline" onClick={downloadTemplate} className="w-fit rounded-xl"><Download className="mr-2 h-4 w-4" />Download Template</Button>
             <div className="space-y-2">
-              <Label htmlFor="file-upload">Upload Employee Excel File</Label>
-              <Input id="file-upload" type="file" ref={fileInputRef} accept=".xlsx,.xls,.csv" onChange={handleFileUpload} disabled={importing} className="cursor-pointer" />
+              <Label htmlFor="file-upload">Upload file</Label>
+              <Input id="file-upload" type="file" ref={fileInputRef} accept=".xlsx,.xls,.csv" onChange={handleFileUpload} disabled={importing} className="cursor-pointer rounded-xl" />
             </div>
             {importing && <div className="text-sm text-muted-foreground">Importing employees... Please wait.</div>}
           </div>
+          <div className="space-y-3 rounded-2xl border border-border bg-background p-4">
+            <h3 className="text-sm font-semibold flex items-center gap-2"><Download className="h-4 w-4 text-primary" />Export to Excel</h3>
+            <Button onClick={exportEmployees} disabled={exporting || employees.length === 0} className="rounded-xl">
+              <Users className="mr-2 h-4 w-4" />{exporting ? "Exporting..." : `Export ${employees.length} Employees`}
+            </Button>
+          </div>
         </div>
-        <div className="space-y-3 border-t border-border pt-6">
-          <h3 className="text-lg font-semibold flex items-center gap-2"><Download className="h-4 w-4" />Export to Excel</h3>
-          <Button onClick={exportEmployees} disabled={exporting || employees.length === 0}>
-            <Users className="mr-2 h-4 w-4" />{exporting ? "Exporting..." : `Export ${employees.length} Employees`}
-          </Button>
-        </div>
-        <div className="bg-muted/50 rounded-lg p-4 border border-border">
+
+        <div className="bg-muted/40 rounded-2xl p-4 border border-border">
           <h4 className="font-semibold text-sm mb-2">Import Instructions:</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• Download the template first to see the required format</li>

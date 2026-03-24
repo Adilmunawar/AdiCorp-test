@@ -8,11 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [readNotifications, setReadNotifications] = useState<Set<string>>(new Set());
   const { userProfile } = useAuth();
+  const navigate = useNavigate();
 
   const { data: recentLogs = [], isLoading } = useQuery({
     queryKey: ['recent-notifications', userProfile?.company_id],
@@ -84,7 +86,7 @@ export default function NotificationDropdown() {
               );
             })}</div>}
         </div>
-        {recentLogs.length > 0 && <div className="p-3 border-t border-border"><Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => { setIsOpen(false); window.location.href = '/timeline-logs'; }}>View All Activity</Button></div>}
+        {recentLogs.length > 0 && <div className="p-3 border-t border-border"><Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => { setIsOpen(false); navigate('/timeline-logs'); }}>View All Activity</Button></div>}
       </PopoverContent>
     </Popover>
   );

@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2, Save, Calendar as CalendarIcon } from "lucide-react";
 import { EmployeeRow } from "@/types/supabase";
+import { useNavigate } from "react-router-dom";
 
 interface AttendanceRecord {
   id?: string; employeeId: string; employeeName: string; date: string; status: string;
@@ -24,6 +25,7 @@ export default function AttendanceTable() {
   const [saving, setSaving] = useState(false);
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const fetchEmployees = async () => {
     try {
@@ -38,7 +40,12 @@ export default function AttendanceTable() {
 
   const fetchAttendance = async (selectedDate: Date) => {
     try {
-      if (!userProfile?.company_id || employees.length === 0) return;
+      if (!userProfile?.company_id) return;
+      if (employees.length === 0) {
+        setAttendanceData([]);
+        return;
+      }
+
       const dateString = selectedDate.toISOString().split('T')[0];
       const employeeIds = employees.map(emp => emp.id);
       const { data: attendanceRecords, error } = await supabase.from('attendance').select('*').eq('date', dateString).in('employee_id', employeeIds);
@@ -57,11 +64,16 @@ export default function AttendanceTable() {
   useEffect(() => {
     const loadData = async () => { setLoading(true); await fetchEmployees(); setLoading(false); };
     if (userProfile?.company_id) loadData();
+    else setLoading(false);
   }, [userProfile?.company_id]);
 
-  useEffect(() => { if (employees.length > 0) fetchAttendance(date); }, [employees, date]);
+  useEffect(() => {
+    if (userProfile?.company_id) {
+      fetchAttendance(date);
+    }
+  }, [employees, date, userProfile?.company_id]);
 
-  const handleDateChange = (newDate: Date | undefined) => { if (newDate) { setDate(newDate); if (employees.length > 0) fetchAttendance(newDate); } };
+  const handleDateChange = (newDate: Date | undefined) => { if (newDate) setDate(newDate); };
   const handleStatusChange = (employeeId: string, status: string) => { setAttendanceData(prev => prev.map(item => item.employeeId === employeeId ? { ...item, status } : item)); };
 
   const saveAttendance = async () => {
@@ -79,15 +91,37 @@ export default function AttendanceTable() {
   
   const getStatusBadge = (status: string) => {
     switch(status) {
-      case 'present': return <Badge className="bg-green-500/20 text-green-600">Present</Badge>;
-      case 'short_leave': return <Badge className="bg-yellow-500/20 text-yellow-600">Short Leave</Badge>;
-      case 'leave': return <Badge className="bg-red-500/20 text-red-600">Leave</Badge>;
+      case 'present': return <Badge variant="default">Present</Badge>;
+      case 'short_leave': return <Badge variant="secondary">Short Leave</Badge>;
+      case 'leave': return <Badge variant="destructive">Leave</Badge>;
       default: return <Badge className="bg-muted text-muted-foreground">Not Set</Badge>;
     }
   };
 
+  const employeeRankMap = useMemo(() => {
+    return new Map(employees.map((employee) => [employee.id, employee.rank]));
+  }, [employees]);
+
+  const summary = useMemo(() => {
+    const present = attendanceData.filter((record) => record.status === "present").length;
+    const shortLeave = attendanceData.filter((record) => record.status === "short_leave").length;
+    const leave = attendanceData.filter((record) => record.status === "leave").length;
+    const notSet = attendanceData.filter((record) => record.status === "not_set").length;
+
+    return { present, shortLeave, leave, notSet };
+  }, [attendanceData]);
+
   if (loading) {
     return (<div className="flex justify-center items-center py-8"><div className="flex items-center space-x-2"><Loader2 className="h-8 w-8 animate-spin text-primary" /><span className="text-muted-foreground">Loading employees...</span></div></div>);
+  }
+
+  if (!userProfile?.company_id) {
+    return (
+      <div className="text-center py-8 space-y-4">
+        <p className="text-muted-foreground">Please complete company setup before marking attendance.</p>
+        <Button variant="outline" onClick={() => navigate('/settings')}>Go to Settings</Button>
+      </div>
+    );
   }
 
   if (employees.length === 0) {
@@ -95,8 +129,21 @@ export default function AttendanceTable() {
   }
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <Card className="glass-card lg:col-span-1">
+    <div className="space-y-6">
+      <Card className="border border-border bg-card shadow-sm">
+        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <CardTitle className="text-foreground">Daily Attendance Tracker</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">Mark, review, and save attendance with clear daily status visibility.</p>
+          </div>
+          <Button onClick={saveAttendance} disabled={saving}>
+            {saving ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>) : (<><Save className="h-4 w-4 mr-2" />Save Attendance</>)}
+          </Button>
+        </CardHeader>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <Card className="border border-border bg-card lg:col-span-1 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-primary" />
@@ -104,21 +151,40 @@ export default function AttendanceTable() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Calendar mode="single" selected={date} onSelect={handleDateChange} className="rounded-md border border-border p-3" />
+          <Calendar mode="single" selected={date} onSelect={handleDateChange} />
         </CardContent>
       </Card>
       
-      <Card className="glass-card lg:col-span-3">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">Daily Attendance - {date.toLocaleDateString()}</CardTitle>
-          <Button onClick={saveAttendance} disabled={saving}>
-            {saving ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>) : (<><Save className="h-4 w-4 mr-2" />Save Attendance</>)}
-          </Button>
+      <Card className="border border-border bg-card lg:col-span-3 shadow-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">Attendance Summary · {date.toLocaleDateString()}</CardTitle>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+            <div className="rounded-xl border border-border bg-background p-3">
+              <p className="text-xs text-muted-foreground">Present</p>
+              <p className="text-lg font-semibold text-foreground">{summary.present}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-background p-3">
+              <p className="text-xs text-muted-foreground">Short Leave</p>
+              <p className="text-lg font-semibold text-foreground">{summary.shortLeave}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-background p-3">
+              <p className="text-xs text-muted-foreground">Leave</p>
+              <p className="text-lg font-semibold text-foreground">{summary.leave}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-background p-3">
+              <p className="text-xs text-muted-foreground">Not Set</p>
+              <p className="text-lg font-semibold text-foreground">{summary.notSet}</p>
+            </div>
+          </div>
         </CardHeader>
+      </Card>
+      </div>
+
+      <Card className="border border-border bg-card shadow-sm">
         <CardContent>
-          <div className="overflow-hidden rounded-lg border border-border">
+          <div className="overflow-hidden rounded-xl border border-border bg-background">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-muted/40">
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead>Employee</TableHead><TableHead>Position</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead>
                 </TableRow>
@@ -127,18 +193,22 @@ export default function AttendanceTable() {
                 {attendanceData.map((record) => (
                   <TableRow key={record.employeeId} className="border-border hover:bg-muted/30 transition-colors">
                     <TableCell className="font-medium">{record.employeeName}</TableCell>
-                    <TableCell>{employees.find(emp => emp.id === record.employeeId)?.rank || 'N/A'}</TableCell>
+                    <TableCell>{employeeRankMap.get(record.employeeId) || 'N/A'}</TableCell>
                     <TableCell>
+                      <div className="flex items-center gap-3">
                       <Select value={record.status} onValueChange={(value) => handleStatusChange(record.employeeId, value)}>
-                        <SelectTrigger className="w-[140px] bg-background border-border">
-                          <SelectValue>{getStatusBadge(record.status)}</SelectValue>
+                        <SelectTrigger className="w-[170px] bg-background border-border">
+                          <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="not_set">Not Set</SelectItem>
                           <SelectItem value="present">Present (Full Day)</SelectItem>
                           <SelectItem value="short_leave">Short Leave (Half Day)</SelectItem>
                           <SelectItem value="leave">Leave (Absent)</SelectItem>
                         </SelectContent>
                       </Select>
+                      {getStatusBadge(record.status)}
+                      </div>
                     </TableCell>
                     <TableCell>{date.toLocaleDateString()}</TableCell>
                   </TableRow>

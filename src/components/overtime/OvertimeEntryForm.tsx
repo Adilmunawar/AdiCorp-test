@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,12 +40,20 @@ export default function OvertimeEntryForm({ open, onOpenChange }: OvertimeEntryF
   }, [open, userProfile?.company_id]);
 
   const fetchData = async () => {
-    const [empRes, tierRes] = await Promise.all([
-      supabase.from("employees").select("id, name, tier, wage_rate, salary_divisor, working_hours_per_day").eq("company_id", userProfile!.company_id!).eq("status", "active").order("name"),
-      supabase.from("tier_config").select("*").eq("company_id", userProfile!.company_id!),
-    ]);
-    setEmployees(empRes.data || []);
-    setTierConfigs(tierRes.data || []);
+    try {
+      const [empRes, tierRes] = await Promise.all([
+        supabase.from("employees").select("id, name, tier, wage_rate, salary_divisor, working_hours_per_day").eq("company_id", userProfile!.company_id!).eq("status", "active").order("name"),
+        supabase.from("tier_config").select("*").eq("company_id", userProfile!.company_id!),
+      ]);
+
+      if (empRes.error) throw empRes.error;
+      if (tierRes.error) throw tierRes.error;
+
+      setEmployees(empRes.data || []);
+      setTierConfigs(tierRes.data || []);
+    } catch (error: any) {
+      toast({ title: "Failed to load overtime form data", description: error.message, variant: "destructive" });
+    }
   };
 
   const selectedEmployee = employees.find((e) => e.id === employeeId);
@@ -97,13 +105,13 @@ export default function OvertimeEntryForm({ open, onOpenChange }: OvertimeEntryF
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md rounded-3xl border border-border bg-card shadow-xl">
         <DialogHeader><DialogTitle>Log Overtime</DialogTitle></DialogHeader>
         <div className="space-y-4 py-4">
           <div>
             <Label>Employee</Label>
             <Select value={employeeId} onValueChange={setEmployeeId}>
-              <SelectTrigger><SelectValue placeholder="Select employee" /></SelectTrigger>
+              <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select employee" /></SelectTrigger>
               <SelectContent>{employees.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -111,7 +119,7 @@ export default function OvertimeEntryForm({ open, onOpenChange }: OvertimeEntryF
             <Label>Date</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
+                <Button variant="outline" className={cn("w-full justify-start text-left font-normal rounded-xl", !date && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />{date ? format(date, "PPP") : "Pick date"}
                 </Button>
               </PopoverTrigger>
@@ -119,11 +127,11 @@ export default function OvertimeEntryForm({ open, onOpenChange }: OvertimeEntryF
             </Popover>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><Label>Hours</Label><Input type="number" step="0.5" value={hours} onChange={(e) => setHours(e.target.value)} placeholder="e.g., 2" /></div>
+            <div><Label>Hours</Label><Input className="rounded-xl" type="number" step="0.5" value={hours} onChange={(e) => setHours(e.target.value)} placeholder="e.g., 2" /></div>
             <div>
               <Label>Type</Label>
               <Select value={overtimeType} onValueChange={setOvertimeType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="regular">Regular</SelectItem>
                   <SelectItem value="weekend">Weekend</SelectItem>
@@ -133,19 +141,19 @@ export default function OvertimeEntryForm({ open, onOpenChange }: OvertimeEntryF
             </div>
           </div>
           {selectedEmployee && Number(hours) > 0 && (
-            <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="p-3 rounded-xl bg-muted/40 border border-border">
               <div className="grid grid-cols-3 gap-2 text-sm">
                 <div><p className="text-muted-foreground">Rate</p><p className="font-semibold">{hourlyRate.toFixed(2)}/hr</p></div>
                 <div><p className="text-muted-foreground">Multiplier</p><p className="font-semibold">{multiplier}x</p></div>
-                <div><p className="text-muted-foreground">Total</p><p className="font-bold text-primary">{totalAmount.toFixed(2)}</p></div>
+                <div><p className="text-muted-foreground">Total</p><p className="font-bold text-foreground">{totalAmount.toFixed(2)}</p></div>
               </div>
             </div>
           )}
-          <div><Label>Reason (optional)</Label><Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for overtime..." /></div>
+          <div><Label>Reason (optional)</Label><Textarea className="rounded-xl" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for overtime..." /></div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={loading}>{loading ? "Submitting..." : "Submit"}</Button>
+          <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button className="rounded-xl" onClick={handleSubmit} disabled={loading}>{loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Submitting...</> : "Submit"}</Button>
         </div>
       </DialogContent>
     </Dialog>

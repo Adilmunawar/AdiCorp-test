@@ -1,4 +1,5 @@
 
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,24 +8,36 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { AuthProvider } from "@/context/AuthContext";
 import PrivateRoute from "@/components/layout/PrivateRoute";
 import AnimatedRoute from "@/components/layout/AnimatedRoute";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Employees from "./pages/Employees";
-import EmployeeProfile from "./pages/EmployeeProfile";
-import Attendance from "./pages/Attendance";
-import WorkingDays from "./pages/WorkingDays";
-import Events from "./pages/Events";
-import Salary from "./pages/Salary";
-import Settings from "./pages/Settings";
-import Reports from "./pages/Reports";
-import TimelineLogsPage from "./pages/TimelineLogs";
-import LeaveManagement from "./pages/LeaveManagement";
-import OvertimePage from "./pages/Overtime";
-import NotFound from "./pages/NotFound";
 import BiometricLockScreen from "./components/auth/BiometricLockScreen";
+import PermissionErrorToaster from "./components/common/PermissionErrorToaster";
+import BrandLoader from "./components/common/BrandLoader";
+
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Employees = lazy(() => import("./pages/Employees"));
+const EmployeeProfile = lazy(() => import("./pages/EmployeeProfile"));
+const Attendance = lazy(() => import("./pages/Attendance"));
+const WorkingDays = lazy(() => import("./pages/WorkingDays"));
+const Events = lazy(() => import("./pages/Events"));
+const Salary = lazy(() => import("./pages/Salary"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Reports = lazy(() => import("./pages/Reports"));
+const TimelineLogsPage = lazy(() => import("./pages/TimelineLogs"));
+const LeaveManagement = lazy(() => import("./pages/LeaveManagement"));
+const OvertimePage = lazy(() => import("./pages/Overtime"));
+const OnboardingPage = lazy(() => import("./pages/Onboarding"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
+
+const RouteLoader = () => (
+  <BrandLoader
+    fullScreen
+    message="Preparing Adicorp workspace"
+    subtitle="Applying secure data and UI modules"
+  />
+);
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -32,24 +45,27 @@ function AnimatedRoutes() {
   return (
     <div key={location.pathname}>
       <AnimatedRoute>
-        <Routes location={location}>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/employees" element={<PrivateRoute><Employees /></PrivateRoute>} />
-          <Route path="/employees/:id" element={<PrivateRoute><EmployeeProfile /></PrivateRoute>} />
-          <Route path="/attendance" element={<PrivateRoute><Attendance /></PrivateRoute>} />
-          <Route path="/working-days" element={<PrivateRoute><WorkingDays /></PrivateRoute>} />
-          <Route path="/events" element={<PrivateRoute><Events /></PrivateRoute>} />
-          <Route path="/salary" element={<PrivateRoute><Salary /></PrivateRoute>} />
-          <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
-          <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
-          <Route path="/timeline-logs" element={<PrivateRoute><TimelineLogsPage /></PrivateRoute>} />
-          <Route path="/leave-management" element={<PrivateRoute><LeaveManagement /></PrivateRoute>} />
-          <Route path="/overtime" element={<PrivateRoute><OvertimePage /></PrivateRoute>} />
-          <Route path="/404" element={<NotFound />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
+        <Suspense fallback={<RouteLoader />}>
+          <Routes location={location}>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/employees" element={<PrivateRoute><Employees /></PrivateRoute>} />
+            <Route path="/employees/:id" element={<PrivateRoute><EmployeeProfile /></PrivateRoute>} />
+            <Route path="/attendance" element={<PrivateRoute><Attendance /></PrivateRoute>} />
+            <Route path="/working-days" element={<PrivateRoute><WorkingDays /></PrivateRoute>} />
+            <Route path="/events" element={<PrivateRoute><Events /></PrivateRoute>} />
+            <Route path="/salary" element={<PrivateRoute><Salary /></PrivateRoute>} />
+            <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+            <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
+            <Route path="/timeline-logs" element={<PrivateRoute><TimelineLogsPage /></PrivateRoute>} />
+            <Route path="/leave-management" element={<PrivateRoute><LeaveManagement /></PrivateRoute>} />
+            <Route path="/overtime" element={<PrivateRoute><OvertimePage /></PrivateRoute>} />
+            <Route path="/onboarding" element={<PrivateRoute><OnboardingPage /></PrivateRoute>} />
+            <Route path="/404" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </Suspense>
       </AnimatedRoute>
     </div>
   );
@@ -61,6 +77,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <PermissionErrorToaster />
         <BiometricLockScreen />
         <BrowserRouter>
           <AnimatedRoutes />

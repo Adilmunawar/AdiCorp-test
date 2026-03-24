@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
@@ -30,6 +29,11 @@ export default function CompanyWorkingSettings() {
   const [loading, setLoading] = useState(false);
   const { userProfile } = useAuth();
   const { toast } = useToast();
+
+  const workweekOptions = [
+    { value: 5, title: "5-Day Week", description: "Monday to Friday" },
+    { value: 6, title: "6-Day Week", description: "Monday to Saturday" },
+  ];
 
   useEffect(() => {
     if (userProfile?.company_id) { fetchSettings(); }
@@ -73,29 +77,44 @@ export default function CompanyWorkingSettings() {
           <Settings className="h-5 w-5 text-primary" />
           Company Working Days Configuration
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Set your default workweek and divisor logic used in attendance and salary workflows.
+        </p>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <Label className="text-sm font-medium mb-2 block">Working Days Per Week</Label>
-              <Select value={settings.default_working_days_per_week.toString()} onValueChange={handleWorkingDaysChange}>
-                <SelectTrigger className="bg-background border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5 Days (Mon-Fri)</SelectItem>
-                  <SelectItem value="6">6 Days (Mon-Sat)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="saturday" className="text-sm">Saturday as Working Day</Label>
-              <Switch id="saturday" checked={settings.weekend_saturday} onCheckedChange={handleSaturdayChange} />
+              <Label className="mb-2 block text-sm font-medium">Workweek Template</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {workweekOptions.map((option) => {
+                  const isActive = settings.default_working_days_per_week === option.value;
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => handleWorkingDaysChange(option.value.toString())}
+                      className={`rounded-lg border p-3 text-left transition-all ${
+                        isActive
+                          ? "border-primary bg-primary/10"
+                          : "border-border bg-background hover:border-primary/40"
+                      }`}
+                    >
+                      <p className="text-sm font-semibold text-foreground">{option.title}</p>
+                      <p className="text-xs text-muted-foreground">{option.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="sunday" className="text-sm">Sunday as Off Day</Label>
               <Switch id="sunday" checked={settings.weekend_sunday} onCheckedChange={(checked) => setSettings(prev => ({ ...prev, weekend_sunday: checked }))} />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="saturday" className="text-sm">Saturday as Working Day</Label>
+              <Switch id="saturday" checked={settings.weekend_saturday} onCheckedChange={handleSaturdayChange} />
             </div>
           </div>
 
@@ -112,12 +131,12 @@ export default function CompanyWorkingSettings() {
                 Salary Divisor: <span className="text-foreground font-medium">{settings.salary_divisor}</span>
               </p>
             </div>
-            <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+            <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
               <div className="flex items-center gap-2 mb-2">
-                <Clock className="h-4 w-4 text-green-600" />
-                <span className="font-medium text-green-600">New Logic</span>
+                <Clock className="h-4 w-4 text-primary" />
+                <span className="font-medium text-primary">Applied Logic</span>
               </div>
-              <p className="text-xs text-green-600">
+              <p className="text-xs text-muted-foreground">
                 {settings.weekend_saturday ? "Saturday is working day → Salary ÷ 26 for daily rate" : "Saturday is off → Salary ÷ 22 for daily rate"}
               </p>
             </div>

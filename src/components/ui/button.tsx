@@ -5,30 +5,30 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold tracking-[0.01em] transition-[transform,box-shadow,background-color,border-color,color,filter] duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[0_1px_2px_hsl(var(--primary)/0.3),0_4px_12px_-2px_hsl(var(--primary)/0.2)] hover:shadow-[0_1px_3px_hsl(var(--primary)/0.4),0_8px_20px_-4px_hsl(var(--primary)/0.25)] hover:brightness-110 rounded-lg",
+          "rounded-2xl bg-primary text-primary-foreground shadow-[0_1px_2px_hsl(var(--primary)/0.24),0_10px_20px_-10px_hsl(var(--primary)/0.42)] hover:-translate-y-0.5 hover:brightness-105 hover:shadow-[0_2px_6px_hsl(var(--primary)/0.28),0_18px_32px_-14px_hsl(var(--primary)/0.5)]",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-[0_1px_2px_hsl(var(--destructive)/0.3)] hover:shadow-[0_1px_3px_hsl(var(--destructive)/0.4),0_6px_16px_-4px_hsl(var(--destructive)/0.2)] hover:brightness-110 rounded-lg",
+          "rounded-2xl bg-destructive text-destructive-foreground shadow-[0_1px_2px_hsl(var(--destructive)/0.28),0_8px_20px_-10px_hsl(var(--destructive)/0.34)] hover:-translate-y-0.5 hover:brightness-105 hover:shadow-[0_2px_6px_hsl(var(--destructive)/0.3),0_16px_28px_-14px_hsl(var(--destructive)/0.4)]",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-primary/20 rounded-lg shadow-sm",
+          "rounded-2xl border border-input/80 bg-background shadow-[inset_0_1px_0_hsl(var(--background)),0_1px_2px_hsl(var(--foreground)/0.04)] hover:-translate-y-0.5 hover:border-primary/30 hover:bg-accent hover:text-accent-foreground hover:shadow-[0_2px_8px_hsl(var(--foreground)/0.08)]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg shadow-sm",
-        ghost: "hover:bg-accent hover:text-accent-foreground rounded-lg",
+          "rounded-2xl bg-secondary text-secondary-foreground shadow-[0_1px_2px_hsl(var(--foreground)/0.05)] hover:-translate-y-0.5 hover:bg-secondary/85 hover:shadow-[0_2px_8px_hsl(var(--foreground)/0.08)]",
+        ghost: "rounded-2xl hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         premium:
-          "bg-primary text-primary-foreground rounded-lg shadow-[0_1px_3px_hsl(var(--primary)/0.3),0_6px_20px_-4px_hsl(var(--primary)/0.25)] hover:shadow-[0_2px_6px_hsl(var(--primary)/0.4),0_12px_32px_-6px_hsl(var(--primary)/0.3)] hover:brightness-110",
+          "rounded-2xl bg-primary text-primary-foreground shadow-[0_1px_3px_hsl(var(--primary)/0.3),0_8px_24px_-8px_hsl(var(--primary)/0.36)] hover:-translate-y-0.5 hover:brightness-105 hover:shadow-[0_2px_8px_hsl(var(--primary)/0.35),0_20px_38px_-14px_hsl(var(--primary)/0.42)]",
         soft:
-          "bg-primary/10 text-primary hover:bg-primary/15 rounded-lg font-medium",
+          "rounded-2xl bg-primary/10 text-primary shadow-[0_1px_2px_hsl(var(--primary)/0.08)] hover:-translate-y-0.5 hover:bg-primary/15 hover:shadow-[0_6px_16px_-10px_hsl(var(--primary)/0.26)]",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 rounded-lg px-3.5 text-xs",
-        lg: "h-11 rounded-lg px-8 text-sm",
-        icon: "h-10 w-10 rounded-lg",
+        default: "h-11 px-5 py-2.5",
+        sm: "h-9 rounded-xl px-3.5 text-xs",
+        lg: "h-12 rounded-2xl px-8 text-sm",
+        icon: "h-11 w-11 rounded-2xl",
       },
     },
     defaultVariants: {

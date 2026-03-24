@@ -93,25 +93,25 @@ export default function EmployeeForm({ employee, onSuccess, onCancel, isOpen, on
 
   const formContent = (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
         <FormField control={form.control} name="name" render={({ field }) => (
           <FormItem>
             <FormLabel>Name</FormLabel>
-            <FormControl><Input placeholder="Enter employee name" {...field} /></FormControl>
+            <FormControl><Input placeholder="Enter employee name" {...field} className="rounded-xl" /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
         <FormField control={form.control} name="rank" render={({ field }) => (
           <FormItem>
             <FormLabel>Rank/Position</FormLabel>
-            <FormControl><Input placeholder="Enter employee rank" {...field} /></FormControl>
+            <FormControl><Input placeholder="Enter employee rank" {...field} className="rounded-xl" /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
         <FormField control={form.control} name="wage_rate" render={({ field }) => (
           <FormItem>
             <FormLabel>Wage Rate</FormLabel>
-            <FormControl><Input type="number" step="0.01" placeholder="Enter wage rate" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
+            <FormControl><Input type="number" step="0.01" placeholder="Enter wage rate" {...field} className="rounded-xl" onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -119,7 +119,7 @@ export default function EmployeeForm({ employee, onSuccess, onCancel, isOpen, on
           <FormItem>
             <FormLabel>Status</FormLabel>
             <Select onValueChange={field.onChange} value={field.value}>
-              <FormControl><SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger></FormControl>
+              <FormControl><SelectTrigger className="rounded-xl"><SelectValue placeholder="Select status" /></SelectTrigger></FormControl>
               <SelectContent>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
@@ -128,11 +128,11 @@ export default function EmployeeForm({ employee, onSuccess, onCancel, isOpen, on
             <FormMessage />
           </FormItem>
         )} />
-        <div className="flex gap-3 pt-4">
-          <Button type="submit" disabled={loading} className="flex-1">
+        <div className="flex gap-3 pt-2">
+          <Button type="submit" disabled={loading} className="flex-1 rounded-xl">
             {loading ? "Saving..." : currentEmployee ? "Update Employee" : "Add Employee"}
           </Button>
-          <Button type="button" variant="outline" onClick={handleCancel} className="flex-1">
+          <Button type="button" variant="outline" onClick={handleCancel} className="flex-1 rounded-xl">
             Cancel
           </Button>
         </div>
@@ -143,10 +143,12 @@ export default function EmployeeForm({ employee, onSuccess, onCancel, isOpen, on
   if (isOpen !== undefined) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
+        <DialogContent className="max-w-xl rounded-3xl border border-border bg-card shadow-xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {currentEmployee ? <Save className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
+            <DialogTitle className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center">
+                {currentEmployee ? <Save className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+              </div>
               {currentEmployee ? "Edit Employee" : "Add New Employee"}
             </DialogTitle>
           </DialogHeader>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Fingerprint, ScanFace, Lock, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBiometric } from "@/hooks/useBiometric";
+import { ADICORP_LOGO_PATH } from "@/lib/branding";
 
 export default function BiometricLockScreen() {
   const { isLocked, verifyBiometric, capabilities } = useBiometric();
@@ -47,7 +48,7 @@ export default function BiometricLockScreen() {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-2">
             <img 
-              src="/AdilMunawar-Uploads/31e3e556-6bb0-44a2-bd2d-6d5fa04f0ba9.png" 
+              src={ADICORP_LOGO_PATH}
               alt="AdiCorp" 
               className="w-10 h-10 rounded-lg"
             />

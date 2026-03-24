@@ -19,9 +19,9 @@ interface SalarySheetProps {
 }
 
 export default function SalarySheet({ employeeSalaryData, totalWorkingDaysThisMonth, currentMonthName, loading, downloading, onDownload }: SalarySheetProps) {
-  const { currency } = useCurrency();
+  useCurrency();
   return (
-    <Card className="glass-card">
+    <Card className="border border-border bg-card shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Attendance-Based Salary Sheet - {currentMonthName}</CardTitle>
         <Button onClick={onDownload} disabled={downloading || loading}>
@@ -35,9 +35,9 @@ export default function SalarySheet({ employeeSalaryData, totalWorkingDaysThisMo
         ) : employeeSalaryData.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground"><p>No active employees found. Add employees to generate salary sheets.</p></div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-border bg-background">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-muted/40">
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead>Employee</TableHead><TableHead>Position</TableHead><TableHead>Monthly Salary</TableHead>
                   <TableHead>Daily Rate</TableHead><TableHead>Working Days</TableHead><TableHead>Calculated Salary</TableHead><TableHead>Status</TableHead>
@@ -51,9 +51,9 @@ export default function SalarySheet({ employeeSalaryData, totalWorkingDaysThisMo
                     <TableCell>{formatCurrencySync(data.monthlySalary)}</TableCell>
                     <TableCell>{formatCurrencySync(data.dailyRate)}</TableCell>
                     <TableCell>{data.actualWorkingDays} / {totalWorkingDaysThisMonth}</TableCell>
-                    <TableCell className="font-bold text-green-600">{formatCurrencySync(data.calculatedSalary)}</TableCell>
+                    <TableCell className="font-bold text-foreground">{formatCurrencySync(data.calculatedSalary)}</TableCell>
                     <TableCell>
-                      <Badge className={data.actualWorkingDays > 0 ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"}>
+                      <Badge variant={data.actualWorkingDays > 0 ? "default" : "destructive"}>
                         {data.actualWorkingDays > 0 ? "Earned" : "No Attendance"}
                       </Badge>
                     </TableCell>

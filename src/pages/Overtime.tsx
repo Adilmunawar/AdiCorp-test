@@ -8,6 +8,7 @@ import OvertimeConfigPanel from "@/components/overtime/OvertimeConfigPanel";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 export default function OvertimePage() {
   const [activeTab, setActiveTab] = useState("records");
@@ -18,25 +19,30 @@ export default function OvertimePage() {
   return (
     <Dashboard title="Overtime Tracking">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Overtime Tracking</h2>
-            <p className="text-sm text-muted-foreground">Track and manage employee overtime hours</p>
+        <div className="rounded-3xl border border-border bg-card p-5 md:p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-2xl font-bold text-foreground">Overtime Tracking</h2>
+                {isAdmin && <Badge variant="secondary">Admin View</Badge>}
+              </div>
+              <p className="text-sm text-muted-foreground">Track, review, and approve overtime with a faster operational workflow.</p>
+            </div>
+            <Button onClick={() => setShowEntryForm(true)} className="gap-2 w-full md:w-auto">
+              <Plus className="h-4 w-4" />
+              Log Overtime
+            </Button>
           </div>
-          <Button onClick={() => setShowEntryForm(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Log Overtime
-          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`grid mb-4 ${isAdmin ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          <TabsList className={`grid mb-4 h-auto gap-1 ${isAdmin ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
             <TabsTrigger value="records" className="gap-2"><Clock className="h-4 w-4" />Records</TabsTrigger>
             {isAdmin && <TabsTrigger value="config" className="gap-2"><Settings2 className="h-4 w-4" />Configuration</TabsTrigger>}
           </TabsList>
 
-          <TabsContent value="records"><OvertimeRecordsList /></TabsContent>
-          {isAdmin && <TabsContent value="config"><OvertimeConfigPanel /></TabsContent>}
+          <TabsContent value="records" className="animate-fade-in"><OvertimeRecordsList /></TabsContent>
+          {isAdmin && <TabsContent value="config" className="animate-fade-in"><OvertimeConfigPanel /></TabsContent>}
         </Tabs>
 
         <OvertimeEntryForm open={showEntryForm} onOpenChange={setShowEntryForm} />

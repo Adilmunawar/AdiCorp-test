@@ -1,4 +1,4 @@
--- Create monthly working days configuration table
+-- Create monthly working days configuration
 CREATE TABLE public.monthly_working_days (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   company_id UUID NOT NULL REFERENCES public.companies(id) ON DELETE CASCADE,

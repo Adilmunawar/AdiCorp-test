@@ -2,27 +2,17 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
-import { useEffect, ReactNode } from "react";
-import { toast } from "sonner";
+import { ReactNode } from "react";
 
 interface PrivateRouteProps {
   children: ReactNode;
 }
 
 export const PrivateRoute = ({ children }: PrivateRouteProps) => {
-  const { user, loading } = useAuth();
+  const { user, loading, userProfile } = useAuth();
   const location = useLocation();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      console.log("PrivateRoute - No authenticated user, redirecting to auth");
-      toast.error("Authentication required", {
-        description: "Please log in to access this page"
-      });
-    }
-  }, [loading, user]);
-
-  console.log("PrivateRoute - Status:", { loading, user: !!user, pathname: location.pathname });
+  const isOnboardingRoute = location.pathname === "/onboarding";
+  const requiresOnboarding = !!user && userProfile !== null && !userProfile?.company_id;
 
   if (loading) {
     return (
@@ -35,7 +25,17 @@ export const PrivateRoute = ({ children }: PrivateRouteProps) => {
     );
   }
 
-  return user ? <>{children}</> : <Navigate to="/auth" state={{ from: location }} replace />;
+  if (!user) {
+    return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  if (requiresOnboarding && !isOnboardingRoute) {
+    const intendedPath = `${location.pathname}${location.search}${location.hash}`;
+    sessionStorage.setItem("post_onboarding_path", intendedPath);
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return <>{children}</>;
 };
 
 export default PrivateRoute;
