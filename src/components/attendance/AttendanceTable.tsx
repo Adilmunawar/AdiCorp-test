@@ -4,18 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Save, Calendar as CalendarIcon } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import { EmployeeRow } from "@/types/supabase";
 import { useNavigate } from "react-router-dom";
+import { AttendanceDatePanel } from "@/components/attendance/AttendanceDatePanel";
+import { AttendanceSummaryPanel } from "@/components/attendance/AttendanceSummaryPanel";
+import { ATTENDANCE_STATUS_OPTIONS, AttendanceRecord, AttendanceStatusValue } from "@/components/attendance/types";
 
-interface AttendanceRecord {
-  id?: string; employeeId: string; employeeName: string; date: string; status: string;
-}
+const isAttendanceStatus = (value: string): value is AttendanceStatusValue => {
+  return ["present", "short_leave", "leave", "not_set"].includes(value);
+};
 
 export default function AttendanceTable() {
   const [date, setDate] = useState<Date>(new Date());
@@ -53,7 +55,11 @@ export default function AttendanceTable() {
       const attendanceMap = new Map((attendanceRecords || []).map(record => [record.employee_id, record]));
       const data = employees.map(employee => {
         const existingRecord = attendanceMap.get(employee.id);
-        return { id: existingRecord?.id, employeeId: employee.id, employeeName: employee.name, date: dateString, status: existingRecord?.status || 'not_set' };
+        const normalizedStatus = existingRecord?.status && isAttendanceStatus(existingRecord.status)
+          ? existingRecord.status
+          : "not_set";
+
+        return { id: existingRecord?.id, employeeId: employee.id, employeeName: employee.name, date: dateString, status: normalizedStatus };
       });
       setAttendanceData(data);
     } catch (error) {
@@ -73,8 +79,13 @@ export default function AttendanceTable() {
     }
   }, [employees, date, userProfile?.company_id]);
 
-  const handleDateChange = (newDate: Date | undefined) => { if (newDate) setDate(newDate); };
-  const handleStatusChange = (employeeId: string, status: string) => { setAttendanceData(prev => prev.map(item => item.employeeId === employeeId ? { ...item, status } : item)); };
+  const handleDateChange = (newDate: Date) => setDate(newDate);
+  const handleStatusChange = (employeeId: string, status: AttendanceStatusValue) => {
+    setAttendanceData(prev => prev.map(item => item.employeeId === employeeId ? { ...item, status } : item));
+  };
+  const applyStatusToAll = (status: AttendanceStatusValue) => {
+    setAttendanceData((prev) => prev.map((item) => ({ ...item, status })));
+  };
 
   const saveAttendance = async () => {
     try {
@@ -143,44 +154,24 @@ export default function AttendanceTable() {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <Card className="border border-border bg-card lg:col-span-1 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-primary" />
-            Select Date
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex justify-center">
-          <Calendar mode="single" selected={date} onSelect={handleDateChange} />
-        </CardContent>
-      </Card>
-      
-      <Card className="border border-border bg-card lg:col-span-3 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">Attendance Summary · {date.toLocaleDateString()}</CardTitle>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-xs text-muted-foreground">Present</p>
-              <p className="text-lg font-semibold text-foreground">{summary.present}</p>
-            </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-xs text-muted-foreground">Short Leave</p>
-              <p className="text-lg font-semibold text-foreground">{summary.shortLeave}</p>
-            </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-xs text-muted-foreground">Leave</p>
-              <p className="text-lg font-semibold text-foreground">{summary.leave}</p>
-            </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-xs text-muted-foreground">Not Set</p>
-              <p className="text-lg font-semibold text-foreground">{summary.notSet}</p>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
+      <AttendanceDatePanel date={date} onDateChange={handleDateChange} />
+      <AttendanceSummaryPanel date={date} summary={summary} totalEmployees={employees.length} />
       </div>
 
       <Card className="border border-border bg-card shadow-sm">
+        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <CardTitle className="text-foreground">Employee Attendance Matrix</CardTitle>
+            <p className="mt-1 text-sm text-muted-foreground">Use quick actions to mark everyone, then adjust individual records if needed.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs uppercase tracking-[0.08em] text-muted-foreground">Apply to all</span>
+            <Button size="sm" onClick={() => applyStatusToAll("present")}>Present</Button>
+            <Button size="sm" variant="secondary" onClick={() => applyStatusToAll("short_leave")}>Short Leave</Button>
+            <Button size="sm" variant="destructive" onClick={() => applyStatusToAll("leave")}>Leave</Button>
+            <Button size="sm" variant="outline" onClick={() => applyStatusToAll("not_set")}>Reset</Button>
+          </div>
+        </CardHeader>
         <CardContent>
           <div className="overflow-hidden rounded-xl border border-border bg-background">
             <Table>
@@ -196,15 +187,14 @@ export default function AttendanceTable() {
                     <TableCell>{employeeRankMap.get(record.employeeId) || 'N/A'}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                      <Select value={record.status} onValueChange={(value) => handleStatusChange(record.employeeId, value)}>
+                      <Select value={record.status} onValueChange={(value) => handleStatusChange(record.employeeId, value as AttendanceStatusValue)}>
                         <SelectTrigger className="w-[170px] bg-background border-border">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="not_set">Not Set</SelectItem>
-                          <SelectItem value="present">Present (Full Day)</SelectItem>
-                          <SelectItem value="short_leave">Short Leave (Half Day)</SelectItem>
-                          <SelectItem value="leave">Leave (Absent)</SelectItem>
+                          {ATTENDANCE_STATUS_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       {getStatusBadge(record.status)}
