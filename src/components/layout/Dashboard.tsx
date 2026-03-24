@@ -67,7 +67,6 @@ export default function Dashboard({ children, title }: DashboardProps) {
           className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 md:p-6 transition-opacity duration-300 ease-out"
           style={{
             opacity: mounted ? 1 : 0,
-            transform: mounted ? "translateY(0)" : "translateY(8px)",
           }}
         >
           <div className="max-w-full">{children}</div>

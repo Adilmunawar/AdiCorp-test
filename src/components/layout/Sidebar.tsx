@@ -61,16 +61,19 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
           "nav-premium-item flex items-center gap-3 rounded-lg px-3 py-2 group",
           compact && "justify-center px-2.5",
           isActive
-            ? "bg-primary text-primary-foreground font-medium"
-            : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            ? "bg-primary text-primary-foreground font-semibold"
+            : "text-muted-foreground hover:text-foreground hover:bg-accent/80"
         )}
       >
-        <item.icon size={17} className={cn(
-          "flex-shrink-0 transition-colors duration-200",
-          !isActive && "group-hover:text-primary"
+        <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className={cn(
+          "flex-shrink-0 transition-all duration-200",
+          !isActive && "group-hover:text-primary group-hover:scale-105"
         )} />
         {!compact && (
           <span className="text-[13px] tracking-[-0.01em] truncate">{item.name}</span>
+        )}
+        {isActive && !collapsed && (
+          <div className="absolute right-2.5 w-1.5 h-1.5 rounded-full bg-primary-foreground/60" />
         )}
       </Link>
     );
@@ -79,7 +82,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
       return (
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>{content}</TooltipTrigger>
-          <TooltipContent side="right" sideOffset={8} className="font-medium text-xs">
+          <TooltipContent side="right" sideOffset={12} className="font-medium text-xs px-3 py-1.5 rounded-lg">
             {item.name}
           </TooltipContent>
         </Tooltip>
@@ -95,7 +98,8 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
         ? cn("w-[272px]", mobileOpen ? "translate-x-0" : "-translate-x-full")
         : collapsed ? "w-[60px]" : "w-[252px]"
     )} style={{
-      background: 'linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.3) 100%)',
+      background: 'hsl(var(--card))',
+      boxShadow: '1px 0 12px -4px hsl(var(--foreground) / 0.06)',
     }}>
       {/* Brand */}
       <div className={cn(
@@ -103,7 +107,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
         compact ? "px-2.5 py-4 justify-center" : "px-5 py-4"
       )}>
         <div className="relative flex-shrink-0">
-          <div className="w-9 h-9 rounded-lg overflow-hidden ring-1 ring-border/50">
+          <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-primary/15 shadow-sm">
             <img 
               src={ADICORP_LOGO_PATH}
               alt="AdiCorp Logo" 
@@ -115,7 +119,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
         {!compact && (
           <div className="min-w-0 flex-1">
             <h1 className="text-sm font-bold text-foreground tracking-tight leading-none">AdiCorp HR</h1>
-            <p className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase mt-0.5">Management</p>
+            <p className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase mt-1">Management</p>
           </div>
         )}
       </div>
@@ -133,7 +137,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
       )}
       
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-4" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex-1 overflow-y-auto py-3 px-1" style={{ scrollbarWidth: 'none' }}>
         {groups.map((group, gi) => {
           const items = navItems.filter(i => i.group === group);
           if (items.length === 0) return null;
@@ -144,7 +148,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
                   {groupLabels[group]}
                 </p>
               ) : (
-                gi > 0 && <div className="w-5 mx-auto mb-2.5 border-t border-border/40" />
+                gi > 0 && <div className="w-6 mx-auto mb-3 border-t border-border/30" />
               )}
               <nav className="space-y-0.5">
                 {items.map((item) => (
@@ -189,14 +193,14 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
           background: 'hsl(var(--primary) / 0.04)',
           border: '1px solid hsl(var(--primary) / 0.08)',
         }}>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{
-            background: 'linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.06))',
-            border: '1px solid hsl(var(--primary) / 0.15)',
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{
+            background: 'linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--primary) / 0.05))',
+            border: '1px solid hsl(var(--primary) / 0.12)',
           }}>
             {loading ? (
-              <Loader2 size={13} className="animate-spin text-primary" />
+              <Loader2 size={14} className="animate-spin text-primary" />
             ) : (
-              <UserCog size={13} className="text-primary" />
+              <UserCog size={14} className="text-primary" />
             )}
           </div>
           {!compact && (
@@ -226,6 +230,6 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapse }: Sid
           {compact && <TooltipContent side="right" sideOffset={8}>Logout</TooltipContent>}
         </Tooltip>
       </div>
-    </div>
+    </aside>
   );
 }
