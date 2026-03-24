@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Save, CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Save, Calendar as CalendarIcon } from "lucide-react";
 import { EmployeeRow } from "@/types/supabase";
 import { useNavigate } from "react-router-dom";
 
@@ -74,7 +74,6 @@ export default function AttendanceTable() {
   }, [employees, date, userProfile?.company_id]);
 
   const handleDateChange = (newDate: Date | undefined) => { if (newDate) setDate(newDate); };
-  const handleDateChange = (newDate: Date | undefined) => { if (newDate) setDate(newDate); };
   const handleStatusChange = (employeeId: string, status: string) => { setAttendanceData(prev => prev.map(item => item.employeeId === employeeId ? { ...item, status } : item)); };
 
   const saveAttendance = async () => {
@@ -89,7 +88,7 @@ export default function AttendanceTable() {
     } catch (error) { toast({ title: "Error saving attendance", description: "Please try again.", variant: "destructive" }); }
     finally { setSaving(false); }
   };
-
+  
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'present': return <Badge variant="default">Present</Badge>;
@@ -126,13 +125,9 @@ export default function AttendanceTable() {
   }
 
   if (employees.length === 0) {
-    return (
-      <div className="text-center py-16">
-        <p className="text-muted-foreground">No active employees found. Please add employees first.</p>
-      </div>
-    );
+    return (<div className="text-center py-8"><p className="text-muted-foreground">No active employees found. Please add employees first.</p></div>);
   }
-
+  
   return (
     <div className="space-y-6">
       <Card className="border border-border bg-card shadow-sm">
@@ -215,7 +210,7 @@ export default function AttendanceTable() {
                       {getStatusBadge(record.status)}
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{format(date, 'M/d/yyyy')}</TableCell>
+                    <TableCell>{date.toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
